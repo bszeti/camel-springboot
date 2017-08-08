@@ -23,9 +23,14 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 @SpringBootApplication
 // load regular Spring XML file from the classpath that contains the Camel XML DSL
 @ImportResource({"classpath:spring/camel-context.xml"})
+//Enable swagger related beans, UI requires the configuration endpoints
+// http://localhost:8080/swagger-ui.html
+@EnableSwagger2
 public class Application {
 
     /**

@@ -19,6 +19,8 @@
     <!-- Camel 2.18.1.redhat-000015 also works -->
     <!-- <fabric8.version>2.2.170.redhat-000013</fabric8.version> -->
 
+    <springfox-swagger>2.7.0</springfox-swagger>
+    
     <!-- plugins -->
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
@@ -73,6 +75,24 @@
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-jackson-starter</artifactId>
     </dependency>
+
+    <!-- swagger -->
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-swagger-java-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger2</artifactId>
+      <version>${springfox-swagger}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger-ui</artifactId>
+      <version>${springfox-swagger}</version>
+    </dependency>
+
+
     <!-- testing -->
     <dependency>
       <groupId>junit</groupId>
