@@ -137,8 +137,9 @@
         </executions>
       </plugin>
       
-      <!-- Extract static files from swagger-ui jar and package under META-INF/resources  
+      <!-- Extract static files from swagger-ui jar and package under /static that is automatically served by spring-boot-web  
            http://localhost:8080/index.html?url=/api/swagger&validatorUrl=
+           Set spring.resources.add-mappings=false to disable publishing directory
       -->
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -157,7 +158,6 @@
                   <version>${swagger-ui.version}</version>
                   <overWrite>true</overWrite>
                   <outputDirectory>${project.build.directory}/swagger-ui</outputDirectory>
-                  <excludes>**/*.gz</excludes>
                 </artifactItem>
               </artifactItems>
             </configuration>
@@ -169,16 +169,15 @@
         <executions>
           <execution>
             <id>copy-resources</id>
-            <phase>generate-resources</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/classes/META-INF/resources/swagger-ui</outputDirectory>
+              <outputDirectory>${project.build.outputDirectory}/static/swagger-ui</outputDirectory>
               <resources>
                 <resource>
                   <directory>${project.build.directory}/swagger-ui/META-INF/resources/webjars/swagger-ui/${swagger-ui.version}</directory>
-                  <filtering>true</filtering>
                 </resource>
               </resources>
             </configuration>
