@@ -18,6 +18,9 @@ public class MyBuilder extends RouteBuilder {
 	public void configure() throws Exception {
 		restConfiguration().component("servlet")
 		.bindingMode(RestBindingMode.json)
+		//Customize in/out Jackson objectmapper (two different instances): json.in.*, json.out.*
+		.dataFormatProperty("json.out.include", "NON_NULL")
+		.dataFormatProperty("json.out.disableFeatures", "WRITE_DATES_AS_TIMESTAMPS")
 		
 		//Swagger settings
 		.contextPath("/api") //base.path; use the mapping set for CamelServlet

@@ -1,8 +1,11 @@
 package my.company;
 
+import java.util.Date;
+
 public class CountryPojo {
 	private String iso;
 	private String country;
+	private Date timestamp = new Date();
 	
 	//Getters, setters
 	public String getIso() {
@@ -18,6 +21,12 @@ public class CountryPojo {
 		this.country = country;
 	}
 	
+	public Date getTimestamp() {
+		return timestamp;
+	}
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
+	}
 	//hasCode, equals
 	@Override
 	public int hashCode() {
