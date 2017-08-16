@@ -110,6 +110,14 @@ public class MyBuilder extends RouteBuilder {
 			.endRest()
 		;
 		
+		rest("/secure").description("Basic auth. Try name:'user' passwd:'secret'.")
+		.get().outType(ApiResponse.class)
+			.route().routeId("secure-get")
+			.log("Secure is called")
+			.setBody(constant(SUCC))
+			.removeHeader("*")
+		.endRest();
+		
 	}
 	
 	//Helper methods used in these routes. It's a good idea to keep them in the RouteBuilder for readability if they are simple.

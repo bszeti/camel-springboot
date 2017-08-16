@@ -20,6 +20,8 @@ or
 
 ### Call API
 ```javascript
+GET http://localhost:8080/api/user/1
+
 POST http://localhost:8080/api/user
 {
 	"name": "Balazs",
@@ -31,6 +33,10 @@ POST http://localhost:8080/api/country
 	"iso": "EN",
 	"country": "England"
 }
+
+GET http://localhost:8080/api/secure
+Basic auth: user/secret
+
 ```
 
 ### Swagger
