@@ -41,8 +41,8 @@ Swagger document is available at
 - http://localhost:8080/api/swagger/swagger.yaml
 
 Swagger UI is at
-- http://localhost:8080/swagger-ui/index.html?url=/api/swagger&validatorUrl=
-- http://localhost:8080/swagger (redirect)
+- http://localhost:8080/webjars/swagger-ui/index.html?url=/api/swagger&validatorUrl=
+- http://localhost:8080/swagger-ui (redirect)
 
 ### Running the example in OpenShift
 
