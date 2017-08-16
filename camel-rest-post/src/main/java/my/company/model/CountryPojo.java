@@ -1,11 +1,8 @@
-package my.company;
-
-import java.util.Date;
+package my.company.model;
 
 public class CountryPojo {
 	private String iso;
 	private String country;
-	private Date timestamp = new Date();
 	
 	//Getters, setters
 	public String getIso() {
@@ -21,12 +18,6 @@ public class CountryPojo {
 		this.country = country;
 	}
 	
-	public Date getTimestamp() {
-		return timestamp;
-	}
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
 	//hasCode, equals
 	@Override
 	public int hashCode() {
@@ -36,6 +27,7 @@ public class CountryPojo {
 		result = prime * result + ((iso == null) ? 0 : iso.hashCode());
 		return result;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

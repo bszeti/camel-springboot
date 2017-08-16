@@ -20,6 +20,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import my.company.model.CountryPojo;
+import my.company.model.UserPojo;
+
 @RunWith(SpringRunner.class)
 @UseAdviceWith
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -45,7 +48,7 @@ public class RestTest extends Assert {
 		context.getRouteDefinition("post-user").adviceWith(context, new AdviceWithRouteBuilder() {
 			@Override
 			public void configure() throws Exception {
-				weaveAddLast().to(resultEndpointUser.getEndpointUri());
+				weaveById("received-user").before().to(resultEndpointUser.getEndpointUri());
 
 			}
 		});
@@ -53,7 +56,7 @@ public class RestTest extends Assert {
 		context.getRouteDefinition("post-country").adviceWith(context, new AdviceWithRouteBuilder() {
 			@Override
 			public void configure() throws Exception {
-				weaveAddLast().to(resultEndpointCountry.getEndpointUri());
+				weaveById("received-country").before().to(resultEndpointCountry.getEndpointUri());
 
 			}
 		});		
@@ -62,9 +65,7 @@ public class RestTest extends Assert {
 	@Test
 	public void testMultiplePostTypes() throws Exception {
 
-		UserPojo user = new UserPojo();
-		user.setAge(21);
-		user.setName("My Name");
+		UserPojo user = new UserPojo("My Name", 21);
 		resultEndpointUser.expectedBodiesReceived(user);
 		resultEndpointUser.expectedMessageCount(1);
 

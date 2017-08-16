@@ -1,8 +1,20 @@
-package my.company;
+package my.company.model;
+
+import java.util.Date;
 
 public class UserPojo {
 	private String name;
 	private Integer age;
+	private Date timestamp = new Date();
+
+	//Construtors
+	public UserPojo() {
+	}
+
+	public UserPojo(String name, Integer age) {
+		this.name = name;
+		this.age = age;
+	}
 	
 	//Getters, setters
 	public String getName() {
@@ -18,7 +30,14 @@ public class UserPojo {
 		this.age = age;
 	}
 	
-	//hasCode, equals
+	public Date getTimestamp() {
+		return timestamp;
+	}
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
+	}
+	
+	//hasCode, equals. timestamp field is not included
 	@Override
 	public int hashCode() {
 		final int prime = 31;
