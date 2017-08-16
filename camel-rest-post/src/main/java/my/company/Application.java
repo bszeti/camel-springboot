@@ -27,22 +27,21 @@ public class Application {
     @Bean
     ServletRegistrationBean servletRegistrationBean(){
     	ServletRegistrationBean servlet = new ServletRegistrationBean(new CamelHttpTransportServlet(), "/api/*");
-    	servlet.setName("CamelServlet");
-    	
+    	servlet.setName("CamelServlet"); //Name must be CamelServlet
     	return servlet;
     }
     
     /**
     * This is only a simple redirect to access swagger UI easier
-    * from "/swagger" to "/swagger-ui/index.html?url=/api/swagger&validatorUrl="
+    * from "/swagger-ui" to "/swagger-ui/index.html?url=/api/swagger&validatorUrl="
     */
     @Controller
     class SwaggerWelcome {
         @RequestMapping(
-            "/swagger"
+            "/swagger-ui"
         )
         public String redirectToUi() {
-            return "redirect:/swagger-ui/index.html?url=/api/swagger&validatorUrl=";
+            return "redirect:/webjars/swagger-ui/index.html?url=/api/swagger&validatorUrl=";
         }
     }
 }

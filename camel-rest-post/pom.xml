@@ -19,7 +19,7 @@
     <!-- Camel 2.18.1.redhat-000015 also works -->
     <!-- <fabric8.version>2.2.170.redhat-000013</fabric8.version> -->
     
-    <swagger-ui.version>3.0.21</swagger-ui.version>
+    <swagger-ui.version>3.1.4</swagger-ui.version>
 
     <!-- plugins -->
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
@@ -77,11 +77,26 @@
       <artifactId>camel-jackson-starter</artifactId>
     </dependency>
     
-    <!--  swagger -->
+    
+    <!-- swagger -->
     <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-swagger-java-starter</artifactId>
     </dependency>
+    <!-- swagger-ui webjars and webjars-locator to have version agnostic URLs
+     http://localhost:8080/webjars/swagger-ui/index.html?url=/api/swagger&validatorUrl=
+     Set spring.resources.add-mappings=false to disable publishing directory
+    -->
+    <dependency>
+        <groupId>org.webjars</groupId>
+        <artifactId>swagger-ui</artifactId>
+        <version>${swagger-ui.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.webjars</groupId>
+        <artifactId>webjars-locator</artifactId>
+    </dependency>
+    
     <!-- testing -->
     <dependency>
       <groupId>junit</groupId>
@@ -133,54 +148,6 @@
             <goals>
               <goal>repackage</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      
-      <!-- Extract static files from swagger-ui jar and package under /static that is automatically served by spring-boot-web  
-           http://localhost:8080/swagger-ui/index.html?url=/api/swagger&validatorUrl=
-           Set spring.resources.add-mappings=false to disable publishing directory
-      -->
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>${maven-dependency-plugin.version}</version>
-        <executions>
-          <execution>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.webjars</groupId>
-                  <artifactId>swagger-ui</artifactId>
-                  <version>${swagger-ui.version}</version>
-                  <overWrite>true</overWrite>
-                  <outputDirectory>${project.build.directory}/swagger-ui</outputDirectory>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.outputDirectory}/static/swagger-ui</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.build.directory}/swagger-ui/META-INF/resources/webjars/swagger-ui/${swagger-ui.version}</directory>
-                </resource>
-              </resources>
-            </configuration>
           </execution>
         </executions>
       </plugin>
