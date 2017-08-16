@@ -9,7 +9,6 @@ import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestParamType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,8 +49,11 @@ public class MyBuilder extends RouteBuilder {
 		restConfiguration().component("servlet")
 			.bindingMode(RestBindingMode.json)
 			//Customize in/out Jackson objectmapper (two different instances): json.in.*, json.out.*
+			.dataFormatProperty("json.in.moduleClassNames", "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule")
 			.dataFormatProperty("json.out.include", "NON_NULL")
 			.dataFormatProperty("json.out.disableFeatures", "WRITE_DATES_AS_TIMESTAMPS")
+			.dataFormatProperty("json.out.moduleClassNames", "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule")
+			
 			
 			//Enable swagger endpoint. It's actually served by a Camel route
 			.apiContextPath("/swagger") //swagger endpoint path; Final URL: Camel path + apiContextPath: /api/swagger
@@ -63,7 +65,6 @@ public class MyBuilder extends RouteBuilder {
 			.apiProperty("schemes", "" ) //Setting empty string as scheme to support relative urls
 			.apiProperty("host", "") //Setting empty string as host so swagger-ui make relative url calls. By default 0.0.0.0 is used
 			;
-		
 		/************************
 		 * Rest endpoints. Multiple can be defined (in multiple RouteBuilder), but should map different URL path
 		 ************************/

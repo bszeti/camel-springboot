@@ -1,11 +1,22 @@
 package my.company.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class UserPojo {
 	private String name;
 	private Integer age;
-	private Date timestamp = new Date();
+	
+	@ApiModelProperty(readOnly=true)
+	private Date createdDate = new Date();
+	
+	@ApiModelProperty(readOnly=true, example="2016-01-31 18:00:00")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime createdLocalDate = LocalDateTime.now();
 
 	//Construtors
 	public UserPojo() {
@@ -30,14 +41,23 @@ public class UserPojo {
 		this.age = age;
 	}
 	
-	public Date getTimestamp() {
-		return timestamp;
+	public Date getCreatedDate() {
+		return createdDate;
 	}
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
 	}
-	
-	//hasCode, equals. timestamp field is not included
+
+	public LocalDateTime getCreatedLocalDate() {
+		return createdLocalDate;
+	}
+
+	public void setCreatedLocalDate(LocalDateTime createdLocalDate) {
+		this.createdLocalDate = createdLocalDate;
+	}
+
+	//hasCode, equals. date fields are not included
 	@Override
 	public int hashCode() {
 		final int prime = 31;
