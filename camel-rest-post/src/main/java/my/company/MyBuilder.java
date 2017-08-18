@@ -1,10 +1,15 @@
 package my.company;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import javax.ws.rs.core.MediaType;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExchangeProperty;
+import org.apache.camel.ExchangeException;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.bean.validator.BeanValidationException;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestParamType;
 import org.slf4j.Logger;
@@ -15,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import my.company.model.ApiResponse;
 import my.company.model.CountryPojo;
+import my.company.model.HeadersPojo;
 import my.company.model.UserPojo;
 
 @Component("mybuilder")
@@ -41,7 +47,7 @@ public class MyBuilder extends RouteBuilder {
 			.to("log:"+MyBuilder.class.getName()+"?showAll=true&multiline=true&level=ERROR")
 			.removeHeaders("*") //don't let message headers get inserted in the http response
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
-			.bean("mybuilder","errorResponse");
+			.bean("mybuilder","errorResponse(*)");
 		
 		/************************
 		 * Rest configuration. There should be only one in a CamelContext
@@ -80,7 +86,8 @@ public class MyBuilder extends RouteBuilder {
 			//route
 			.route().routeId("user-get")
 				.log("Get user: ${header.id}")
-				.validate().simple("${header.id} < 100") //Throw exception if id>=100
+				.setBody().simple("${headers}",HeadersPojo.class)
+				.to("bean-validator:validateHeaders") //or .validate().simple("${header.id} < 100")
 				.setBody(constant(DUMMY_USER))
 				.removeHeaders("*")
 			.endRest()
@@ -125,8 +132,18 @@ public class MyBuilder extends RouteBuilder {
 	public static ApiResponse errorResponse(int code, String message){
 		return new ApiResponse(code, message);
 	}
-	public static ApiResponse errorResponse(@ExchangeProperty(Exchange.EXCEPTION_CAUGHT) Exception ex){
+	
+	public static ApiResponse errorResponse(@ExchangeException Exception ex){
+		String message;
+		if (ex instanceof BeanValidationException){
+			message = Optional.ofNullable(((BeanValidationException)ex).getConstraintViolations()).orElseGet(Collections::emptySet)
+					.stream()
+					.map((v)->"'"+v.getPropertyPath()+"' "+v.getMessage())
+					.collect(Collectors.joining("; "));
+		} else {
+			message = ex.getMessage();
+		}
 		return new ApiResponse(5000, ex.getMessage());
 	}
-
+	
 }
