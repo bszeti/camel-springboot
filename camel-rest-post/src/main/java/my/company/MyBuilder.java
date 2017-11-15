@@ -65,7 +65,7 @@ public class MyBuilder extends RouteBuilder {
 			.apiContextPath("/swagger") //swagger endpoint path; Final URL: Camel path + apiContextPath: /api/swagger
 			.apiContextRouteId("swagger") //id of route providing the swagger endpoint
 			
-			.contextPath("/api") //base.path swagger property; use the mapping URL set for CamelServlet
+			.contextPath("/api") //base.path swagger property; use the mapping URL set for CamelServlet camel.component.servlet.mapping.contextPath
 			.apiProperty("api.title", "Example REST api")
 			.apiProperty("api.version", "1.0")
 			.apiProperty("schemes", "" ) //Setting empty string as scheme to support relative urls

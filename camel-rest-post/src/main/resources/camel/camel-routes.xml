@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns="http://camel.apache.org/schema/spring">
+  <!-- Define additional camel routes here 
+       classpath:camel/*.xml is automatically scanned
+  -->
+  
+    <route id="run-once-route">
+      <from uri="timer:foo?period=2000&amp;repeatCount=1"/>
+      <log message="Running 'run-once-route'"/>
+    </route>
+</routes>
