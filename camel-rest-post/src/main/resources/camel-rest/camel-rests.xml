@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rests xmlns="http://camel.apache.org/schema/spring">
-  <!-- Define additional camel rest endpoints 
-       classpath:camel-rest/*.xml is automatically scanned
-  -->
-  
-   <rest path="/hello">
-    <get uri="/world">
-      <route>
-      	<log message="Get /hello/world"/>
-      	<setBody><constant>Hello World!</constant></setBody>
-      </route>
-    </get>
-  </rest>
+	<!-- Define additional camel rest endpoints classpath:camel-rest/*.xml is 
+		automatically scanned -->
+
+	<rest path="/hello">
+		<get uri="/world">
+			<param name="businessId" type="header" required="false"/>
+			<responseMessage code="200" responseModel="my.company.model.ApiResponse" message="status response" />
+			<route id="hello-world-get">
+				<log message="Get /hello/world" />
+				<removeHeaders pattern="*" excludePattern="businessId" />
+				<setBody>
+					<simple>${ref:succResponse}</simple>
+				</setBody>
+			</route>
+		</get>
+	</rest>
 
 </rests>

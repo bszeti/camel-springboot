@@ -17,4 +17,8 @@
 <!--     </route> -->
 <!--   </camelContext> -->
 
+<bean id="succResponse" class="my.company.model.ApiResponse">
+	<property name="message" value="OK" />
+</bean>
+
 </beans>

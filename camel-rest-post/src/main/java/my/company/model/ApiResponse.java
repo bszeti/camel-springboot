@@ -13,6 +13,8 @@ public class ApiResponse {
 	@JsonProperty
 	private String message;
 
+	public ApiResponse() {};
+
 	public ApiResponse(int code, String message) {
 		this.code = code;
 		this.message = message;

@@ -5,7 +5,10 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
 import org.apache.camel.converter.dozer.DozerTypeConverter;
+import org.apache.camel.spi.UnitOfWork;
+import org.apache.camel.spi.UnitOfWorkFactory;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.dozer.DozerBeanMapper;
@@ -112,6 +115,19 @@ public class Application {
 	@ConfigurationProperties("ds.secondary")
 	public DataSource mySecondaryDataSource() {
 		return new BasicDataSource();
+	}
+	
+	/**
+	 * Enable custom unit of work
+	 */
+	@Bean
+	UnitOfWorkFactory customUnitOfWorkFactory() {
+		return new UnitOfWorkFactory() {
+			@Override
+			public UnitOfWork createUnitOfWork(Exchange exchange) {
+				return new CustomMDCBreadCrumbIdUnitOfWork(exchange);
+			}
+		};
 	}
     
 }
