@@ -1,4 +1,4 @@
-package my.company;
+package my.company.utils;
 
 import java.util.UUID;
 
