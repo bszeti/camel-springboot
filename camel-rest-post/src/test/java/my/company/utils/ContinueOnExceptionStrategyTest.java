@@ -8,9 +8,19 @@ import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.camel.util.toolbox.FlexibleAggregationStrategy;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * BlockJUnit4ClassRunner is the default Junit4 runner.
+ * Having CamelTestSupport tests and CamelSpringBootRunner tests in the same project can cause problems because CamelSpringBootRunner disables CamelContext startup during init. 
+ * So if the CamelTestSupport test is run before the CamelSpringBootRunner, the context won't start. 
+ * Use maven with maven-surefire-plugin v2.19.1+ or reuseForks=false to avoid this problem. It still can happen in Eclipse running tests for example.
+ */
+@RunWith(BlockJUnit4ClassRunner.class)
 public class ContinueOnExceptionStrategyTest extends CamelTestSupport {
 	private static final Logger log = LoggerFactory.getLogger(ContinueOnExceptionStrategyTest.class);
 
@@ -21,7 +31,7 @@ public class ContinueOnExceptionStrategyTest extends CamelTestSupport {
             	AggregationStrategy aggregationStrategy = 
             			//Join message bodies with ":" delimiter
             			new FlexibleAggregationStrategy<>()
-            			.pick(body())
+            			.pick(bodyAs(String.class)) //If cast to given fails, null is returned which is simply not collected
             			.accumulateInCollection(ArrayList.class)
             			.storeInBody()
             			.completionAware((exchange) -> {

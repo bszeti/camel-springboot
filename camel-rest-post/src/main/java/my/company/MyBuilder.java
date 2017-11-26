@@ -38,23 +38,23 @@ public class MyBuilder extends RouteBuilder {
 		onException(JsonProcessingException.class)
 			.handled(true)
 			.to("log:"+MyBuilder.class.getName()+"?showAll=true&multiline=true&level=ERROR")
-			.removeHeaders("*") //don't let message headers get inserted in the http response
+			.removeHeaders("*","businessId") //don't let message headers get inserted in the http response
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
 			.bean("mybuilder","errorResponse(4000,'Invalid json content')");
 		
 		onException(Exception.class)
 			.handled(true)
 			.to("log:"+MyBuilder.class.getName()+"?showAll=true&multiline=true&level=ERROR")
-			.removeHeaders("*") //don't let message headers get inserted in the http response
+			.removeHeaders("*","businessId") //don't let message headers get inserted in the http response
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
 			.bean("mybuilder","errorResponse(*)");
 		
 		/************************
 		 * Rest configuration. There should be only one in a CamelContext
 		 ************************/
-		restConfiguration().component("servlet")
+		restConfiguration().component("servlet") //Requires "CamelServlet" to be registered
 			.bindingMode(RestBindingMode.json)
-			//Customize in/out Jackson objectmapper (two different instances): json.in.*, json.out.*
+			//Customize in/out Jackson objectmapper, see JsonDataFormat. Two different instances): json.in.*, json.out.*
 			.dataFormatProperty("json.in.moduleClassNames", "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule")
 			.dataFormatProperty("json.out.include", "NON_NULL")
 			.dataFormatProperty("json.out.disableFeatures", "WRITE_DATES_AS_TIMESTAMPS")
@@ -89,7 +89,7 @@ public class MyBuilder extends RouteBuilder {
 				.setBody().simple("${headers}",HeadersPojo.class)
 				.to("bean-validator:validateHeaders") //or .validate().simple("${header.id} < 100")
 				.setBody(constant(DUMMY_USER))
-				.removeHeaders("*")
+				.removeHeaders("*","businessId")
 			.endRest()
 		.post("/").type(UserPojo.class)
 			//swagger
@@ -101,7 +101,7 @@ public class MyBuilder extends RouteBuilder {
 			.route().routeId("post-user")
 				.log("User received: ${body}").id("received-user") //This step gets an id, so we can refer it in test
 				.setBody(constant(SUCC))
-				.removeHeader("*")
+				.removeHeaders("*","businessId")
 			.endRest();
 		
 		//Another rest dsl
@@ -122,7 +122,7 @@ public class MyBuilder extends RouteBuilder {
 			.route().routeId("secure-get")
 			.log("Secure is called")
 			.setBody(constant(SUCC))
-			.removeHeader("*")
+			.removeHeaders("*","businessId")
 		.endRest();
 		
 	}

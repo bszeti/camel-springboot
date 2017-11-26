@@ -103,7 +103,7 @@ public class Application {
     
 	/**
 	 * Datasources. One mast be marked as primary for autowired. The BasicDataSource
-	 * properties (including pooling) are set by configuration
+	 * properties (including pooling) are set by configuration. destroyMethod is set to null to avoid notification of double shutdown
 	 */
 	@Bean(value = "myPrimaryDS", destroyMethod = "")
 	@Primary
@@ -119,7 +119,7 @@ public class Application {
 	}
 	
 	/**
-	 * Enable custom unit of work
+	 * Enable custom unit of work. UnitOfWorkFactory bean is automatically picked up by Camel context
 	 */
 	@Bean
 	UnitOfWorkFactory customUnitOfWorkFactory() {

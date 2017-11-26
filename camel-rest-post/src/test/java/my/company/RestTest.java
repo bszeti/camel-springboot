@@ -4,9 +4,11 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.ServiceStatus;
 import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.builder.ExchangeBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.apache.camel.test.spring.UseAdviceWith;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,12 +22,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import my.company.model.CountryPojo;
 import my.company.model.UserPojo;
 
-@RunWith(SpringRunner.class)
+@RunWith(CamelSpringBootRunner.class)
 @UseAdviceWith
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode=ClassMode.AFTER_CLASS) //classMode default value. Shutdown spring context after class (all tests are run using the same context)
@@ -47,22 +48,28 @@ public class RestTest extends Assert {
 
 	@Before
 	public void before() throws Exception {
-		//This stops and restart the routes after the modification
-		context.getRouteDefinition("post-user").adviceWith(context, new AdviceWithRouteBuilder() {
-			@Override
-			public void configure() throws Exception {
-				weaveById("received-user").before().to(resultEndpointUser.getEndpointUri());
-
-			}
-		});
-
-		context.getRouteDefinition("post-country").adviceWith(context, new AdviceWithRouteBuilder() {
-			@Override
-			public void configure() throws Exception {
-				weaveById("received-country").before().to(resultEndpointCountry.getEndpointUri());
-
-			}
-		});		
+		//Before is called for each methods, but we only want to run this once
+		if (context.getStatus()==ServiceStatus.Stopped) {
+			
+			context.getRouteDefinition("post-user").adviceWith(context, new AdviceWithRouteBuilder() {
+				@Override
+				public void configure() throws Exception {
+					weaveById("received-user").before().to(resultEndpointUser.getEndpointUri());
+	
+				}
+			});
+	
+			context.getRouteDefinition("post-country").adviceWith(context, new AdviceWithRouteBuilder() {
+				@Override
+				public void configure() throws Exception {
+					weaveById("received-country").before().to(resultEndpointCountry.getEndpointUri());
+	
+				}
+			});
+			
+			//Manually start context after adviceWith
+			context.start();
+		}
 	}
 
 	@Test
