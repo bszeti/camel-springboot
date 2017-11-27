@@ -1,5 +1,7 @@
 package my.company;
 
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -23,6 +25,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import my.company.model.HeadersPojo;
 import my.company.utils.CustomMDCBreadCrumbIdUnitOfWork;
@@ -129,6 +136,20 @@ public class Application {
 				return new CustomMDCBreadCrumbIdUnitOfWork(exchange);
 			}
 		};
+	}
+	
+	/**
+	 * Example how to register a custom Jackson ObjectMapper for Spring (not used by Camel rest). Uncomment @Bean if needed.
+	 */
+	//@Bean
+	ObjectMapper customObjectMapperForSpring() {
+		ObjectMapper mapper = new ObjectMapper();
+		JavaTimeModule javaTimeModule = new JavaTimeModule();
+		javaTimeModule.addSerializer(new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("YYYY-MMM")));
+		mapper.registerModule(javaTimeModule);
+		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		mapper.setDateFormat(new SimpleDateFormat("YYYY"));
+		return mapper;
 	}
     
 }
