@@ -1,4 +1,4 @@
-package my.company;
+package my.company.route;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -10,7 +10,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ExchangeException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.bean.validator.BeanValidationException;
-import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestParamType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,28 +50,6 @@ public class MyBuilder extends RouteBuilder {
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
 			.bean("mybuilder","errorResponse(*)");
 		
-		/************************
-		 * Rest configuration. There should be only one in a CamelContext
-		 ************************/
-		restConfiguration().component("servlet") //Requires "CamelServlet" to be registered
-			.bindingMode(RestBindingMode.json)
-			//Customize in/out Jackson objectmapper, see JsonDataFormat. Two different instances): json.in.*, json.out.*
-			.dataFormatProperty("json.in.moduleClassNames", "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule")
-			.dataFormatProperty("json.out.include", "NON_NULL")
-			.dataFormatProperty("json.out.disableFeatures", "WRITE_DATES_AS_TIMESTAMPS")
-			.dataFormatProperty("json.out.moduleClassNames", "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule")
-			
-			
-			//Enable swagger endpoint. It's actually served by a Camel route
-			.apiContextPath("/swagger") //swagger endpoint path; Final URL: Camel path + apiContextPath: /api/swagger
-			.apiContextRouteId("swagger") //id of route providing the swagger endpoint
-			
-			.contextPath("/api") //base.path swagger property; use the mapping URL set for CamelServlet camel.component.servlet.mapping.contextPath
-			.apiProperty("api.title", "Example REST api")
-			.apiProperty("api.version", "1.0")
-			.apiProperty("schemes", "" ) //Setting empty string as scheme to support relative urls
-			.apiProperty("host", "") //Setting empty string as host so swagger-ui make relative url calls. By default 0.0.0.0 is used
-			;
 		/************************
 		 * Rest endpoints. Multiple can be defined (in multiple RouteBuilder), but should map different URL path
 		 ************************/
@@ -147,7 +124,7 @@ public class MyBuilder extends RouteBuilder {
 		} else {
 			message = ex.getMessage();
 		}
-		return new ApiResponse(5000, ex.getMessage());
+		return new ApiResponse(5000, message);
 	}
 	
 }
