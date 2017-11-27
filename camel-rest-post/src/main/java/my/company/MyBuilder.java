@@ -30,6 +30,8 @@ public class MyBuilder extends RouteBuilder {
 	private final static UserPojo DUMMY_USER = new UserPojo("JohnDoe", 21);
 	private final static ApiResponse SUCC = new ApiResponse(0,"OK");
 	
+	public final static String HEADER_BUSINESSID = "businessId";
+	
 	@Override
 	public void configure() throws Exception {
 		/************************
@@ -38,14 +40,14 @@ public class MyBuilder extends RouteBuilder {
 		onException(JsonProcessingException.class)
 			.handled(true)
 			.to("log:"+MyBuilder.class.getName()+"?showAll=true&multiline=true&level=ERROR")
-			.removeHeaders("*","businessId") //don't let message headers get inserted in the http response
+			.removeHeaders("*",HEADER_BUSINESSID) //don't let message headers get inserted in the http response
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
 			.bean("mybuilder","errorResponse(4000,'Invalid json content')");
-		
+			
 		onException(Exception.class)
 			.handled(true)
 			.to("log:"+MyBuilder.class.getName()+"?showAll=true&multiline=true&level=ERROR")
-			.removeHeaders("*","businessId") //don't let message headers get inserted in the http response
+			.removeHeaders("*",HEADER_BUSINESSID) //don't let message headers get inserted in the http response
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
 			.bean("mybuilder","errorResponse(*)");
 		
@@ -81,6 +83,7 @@ public class MyBuilder extends RouteBuilder {
 			//swagger
 			.description("Query user")
 			.param().name("id").type(RestParamType.path).description("Id of the user. Must be number and less than 100.").required(true).dataType("string").endParam()
+			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transactionid. Defaults to a random uuid").dataType("string").endParam()
 			.responseMessage().code(200).responseModel(UserPojo.class).endResponseMessage() //OK
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
 			//route
@@ -94,6 +97,7 @@ public class MyBuilder extends RouteBuilder {
 		.post("/").type(UserPojo.class)
 			//swagger
 			.description("Send user")
+			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transactionid. Defaults to a random uuid").dataType("string").endParam()
 			.responseMessage().code(200).responseModel(ApiResponse.class).endResponseMessage() //OK
 			.responseMessage().code(400).responseModel(ApiResponse.class).message("Unexpected body").endResponseMessage() //Wrong input
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
@@ -101,7 +105,7 @@ public class MyBuilder extends RouteBuilder {
 			.route().routeId("post-user")
 				.log("User received: ${body}").id("received-user") //This step gets an id, so we can refer it in test
 				.setBody(constant(SUCC))
-				.removeHeaders("*","businessId")
+				.removeHeaders("*",HEADER_BUSINESSID)
 			.endRest();
 		
 		//Another rest dsl
@@ -122,7 +126,7 @@ public class MyBuilder extends RouteBuilder {
 			.route().routeId("secure-get")
 			.log("Secure is called")
 			.setBody(constant(SUCC))
-			.removeHeaders("*","businessId")
+			.removeHeaders("*",HEADER_BUSINESSID)
 		.endRest();
 		
 	}

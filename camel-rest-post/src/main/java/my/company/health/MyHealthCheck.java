@@ -29,7 +29,7 @@ public class MyHealthCheck implements HealthIndicator {
 		return Health.up()
 				.withDetail("hostname", hostname)
 				.withDetail("localTime", LocalDateTime.now())
-				.withDetail("date", new Date())
+				.withDetail("date", new Date()) // uses spring.jackson.date-format
 				.build();
 	}
 
