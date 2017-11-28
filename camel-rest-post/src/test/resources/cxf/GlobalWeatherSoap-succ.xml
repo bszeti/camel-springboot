@@ -1,0 +1,8 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap:Body>
+		<GetCitiesByCountryResponse xmlns="http://www.webserviceX.NET">
+			<GetCitiesByCountryResult>&lt;NewDataSet&gt;&lt;Table&gt;&lt;Country&gt;TEST&lt;/Country&gt;&lt;City&gt;AA&lt;/City&gt;&lt;/Table&gt;&lt;Table&gt;&lt;Country&gt;TEST&lt;/Country&gt;&lt;City&gt;BB&lt;/City&gt;&lt;/Table&gt;&lt;/NewDataSet&gt;
+			</GetCitiesByCountryResult>
+		</GetCitiesByCountryResponse>
+	</soap:Body>
+</soap:Envelope>

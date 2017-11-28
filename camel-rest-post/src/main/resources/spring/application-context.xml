@@ -31,7 +31,7 @@
 		address="${GlobalWeather.url}"
 		serviceClass="net.webservicex.GlobalWeatherSoap">
 		<cxf:features>
-			<bean class="org.apache.cxf.feature.LoggingFeature"/>
+			<bean class="org.apache.cxf.feature.LoggingFeature"/> <!-- Logs in/out message at INFO level -->
 		</cxf:features>
 	</cxf:cxfEndpoint>
 

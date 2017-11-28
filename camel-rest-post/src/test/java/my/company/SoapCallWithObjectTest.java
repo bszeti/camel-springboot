@@ -3,10 +3,8 @@ package my.company;
 import java.util.Arrays;
 
 import org.apache.camel.CamelContext;
-import org.apache.camel.EndpointInject;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
-import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.junit.Assert;
@@ -27,8 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
 import my.company.model.ApiResponse;
 import my.company.model.CitiesResponse;
 import my.company.route.MyBuilder;
@@ -38,11 +34,7 @@ import net.webservicex.GlobalWeatherSoap;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-public class SoapCallTestWithObject extends Assert {
-	@EndpointInject(uri = "mock:user")
-	protected MockEndpoint resultEndpointUser;
-	@EndpointInject(uri = "mock:country")
-	protected MockEndpoint resultEndpointCountry;
+public class SoapCallWithObjectTest extends Assert {
 
 	@Autowired
 	TestRestTemplate testRestTemplate; // Supports relative URLs to call the server running on random port
@@ -66,7 +58,7 @@ public class SoapCallTestWithObject extends Assert {
 				public void configure() throws Exception {
 					from("cxf:/GlobalWeather?serviceClass=" + GlobalWeatherSoap.class.getName())
 							.routeId("test-GlobalWeatherSoap")
-							.toD("direct:${header" + CxfConstants.OPERATION_NAME + "}");
+							.toD("direct:${header." + CxfConstants.OPERATION_NAME + "}");
 
 					from("direct:GetCitiesByCountry")
 						.setProperty("country",simple("${body[0]}",String.class)) //The method arguments are in a org.apache.cxf.message.MessageContentsList
@@ -98,7 +90,7 @@ public class SoapCallTestWithObject extends Assert {
 				HttpMethod.GET, new HttpEntity(headers), CitiesResponse.class);
 
 		assertEquals(200, citiesResponse.getStatusCodeValue());
-		assertEquals("successfulResponse-test", citiesResponse.getHeaders().get(MyBuilder.HEADER_BUSINESSID));
+		assertEquals("successfulResponse-test", citiesResponse.getHeaders().getFirst(MyBuilder.HEADER_BUSINESSID));
 		assertEquals("TEST", citiesResponse.getBody().getCountry());
 		assertEquals(Arrays.asList("AA","BB"), citiesResponse.getBody().getCities());
 

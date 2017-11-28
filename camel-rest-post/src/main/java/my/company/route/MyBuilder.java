@@ -18,6 +18,7 @@ import org.apache.camel.component.bean.validator.BeanValidationException;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.language.XPath;
 import org.apache.camel.model.rest.RestParamType;
+import org.apache.cxf.binding.soap.SoapFault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,7 @@ public class MyBuilder extends RouteBuilder {
 	private final static ApiResponse SUCC = new ApiResponse(0,"OK");
 	
 	public final static String HEADER_BUSINESSID = "businessId";
-	
+		
 	@Override
 	public void configure() throws Exception {
 		/************************
@@ -103,21 +104,23 @@ public class MyBuilder extends RouteBuilder {
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
 			.route().routeId("country-get-cities")
 				.log("Getting cities for ${header.country}")
-				.setProperty("country",header("country")) //Save input values needed later as ExchangeProperty
-				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (insted of GetCitiesByCountryRequest
+				
+				//Save input headers/values needed later as ExchangeProperty
+				.setProperty("country",header("country"))
 				
 				//CXF call
+				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (insted of GetCitiesByCountryRequest
 				.removeHeaders("*", HEADER_BUSINESSID)
 				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
-				.to("cxf:bean:cxfGlobalWeather")
+				.to("cxf:bean:cxfGlobalWeather?synchronous=true") //Use synchronous to use the same thread to make the http call
 				.setBody(method(MyBuilder.class,"convertNodeListToList"))
 				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
 				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
+				.setProperty("cities",body())
 				
 				//Response object
 				.setBody(method(MyBuilder.class,"createResponse"))
 				.removeHeaders("*", HEADER_BUSINESSID)
-				
 			.endRest()
 		.post("/").type(CountryPojo.class)
 			//swagger
@@ -156,15 +159,23 @@ public class MyBuilder extends RouteBuilder {
 	
 	public static ApiResponse errorResponse(@ExchangeException Exception ex){
 		String message;
+		int code = 5000;
 		if (ex instanceof BeanValidationException){
+			code=5001;
 			message = Optional.ofNullable(((BeanValidationException)ex).getConstraintViolations()).orElseGet(Collections::emptySet)
 					.stream()
 					.map((v)->"'"+v.getPropertyPath()+"' "+v.getMessage())
 					.collect(Collectors.joining("; "));
-		} else {
+		} else if (ex instanceof SoapFault) {
+			//SoapFault in only thrown is http 200 was returned with soap:Fault, otherwise cxf throws the http exception
+			code=5002;
+			message = "Error calling soap service: "+((SoapFault)ex).getMessage();
+			
+		}
+		else {
 			message = ex.getMessage();
 		}
-		return new ApiResponse(5000, message);
+		return new ApiResponse(code, message);
 	}
 	
 	//Convert xml path NodeList to List
