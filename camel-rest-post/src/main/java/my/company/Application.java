@@ -36,7 +36,7 @@ import my.company.utils.CustomMDCBreadCrumbIdUnitOfWork;
 
 @SpringBootApplication
 // load regular Spring XML file from the classpath that contains the Camel XML DSL
-@ImportResource({"classpath:spring/camel-*.xml"})
+@ImportResource({"classpath:spring/*.xml"})
 public class Application {
 	private final static Logger log = LoggerFactory.getLogger(Application.class);
 

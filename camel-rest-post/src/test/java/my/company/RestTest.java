@@ -32,6 +32,7 @@ import my.company.model.UserPojo;
 @DirtiesContext(classMode=ClassMode.AFTER_CLASS) //classMode default value. Shutdown spring context after class (all tests are run using the same context)
 public class RestTest extends Assert {
 
+	//Local server port can be injected also available in the context as {{local.server.port}}.
 	@LocalServerPort
 	Integer port;
 

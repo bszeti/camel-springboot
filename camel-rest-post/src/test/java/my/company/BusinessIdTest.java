@@ -64,10 +64,11 @@ public class BusinessIdTest extends Assert {
 				.send();
 		
 		assertEquals(500, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
+		assertEquals("X",response.getIn().getHeader(MyBuilder.HEADER_BUSINESSID,String.class));
 		
-		String businessId = response.getIn().getHeader(MyBuilder.HEADER_BUSINESSID,String.class);
-		log.info("response: {}",response.getIn().getBody(String.class));
-		ApiResponse apiResponse = objectmapper.readValue(response.getIn().getBody(String.class), ApiResponse.class);
+		String responseBody = response.getIn().getBody(String.class); //Body is byte[] (or may be InputStream in case of other http clients)
+		log.info("body: {}",responseBody);
+		ApiResponse apiResponse = objectmapper.readValue(responseBody, ApiResponse.class); //Unmarshall manually with Jackson
 		assertEquals("'businessId' length must be between 16 and 48", apiResponse.getMessage());
 		
 	}

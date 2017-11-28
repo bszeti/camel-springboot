@@ -1,23 +1,32 @@
 package my.company.route;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.camel.Body;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangeException;
+import org.apache.camel.ExchangeProperty;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.bean.validator.BeanValidationException;
+import org.apache.camel.component.cxf.common.message.CxfConstants;
+import org.apache.camel.language.XPath;
 import org.apache.camel.model.rest.RestParamType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.NodeList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import my.company.model.ApiResponse;
+import my.company.model.CitiesResponse;
 import my.company.model.CountryPojo;
 import my.company.model.HeadersPojo;
 import my.company.model.UserPojo;
@@ -60,7 +69,7 @@ public class MyBuilder extends RouteBuilder {
 			//swagger
 			.description("Query user")
 			.param().name("id").type(RestParamType.path).description("Id of the user. Must be number and less than 100.").required(true).dataType("string").endParam()
-			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transactionid. Defaults to a random uuid").dataType("string").endParam()
+			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transactionid. Defaults to a random uuid").required(false).dataType("string").endParam()
 			.responseMessage().code(200).responseModel(UserPojo.class).endResponseMessage() //OK
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
 			//route
@@ -88,6 +97,28 @@ public class MyBuilder extends RouteBuilder {
 		//Another rest dsl
 		rest("/country").description("Country API")
 			.skipBindingOnErrorCode(false)
+		.get("/{country}/cities")
+			.description("Get cities of country by calling s SOAP service")
+			.responseMessage().code(200).responseModel(CitiesResponse.class).endResponseMessage() //OK
+			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
+			.route().routeId("country-get-cities")
+				.log("Getting cities for ${header.country}")
+				.setProperty("country",header("country")) //Save input values needed later as ExchangeProperty
+				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (insted of GetCitiesByCountryRequest
+				
+				//CXF call
+				.removeHeaders("*", HEADER_BUSINESSID)
+				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
+				.to("cxf:bean:cxfGlobalWeather")
+				.setBody(method(MyBuilder.class,"convertNodeListToList"))
+				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
+				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
+				
+				//Response object
+				.setBody(method(MyBuilder.class,"createResponse"))
+				.removeHeaders("*", HEADER_BUSINESSID)
+				
+			.endRest()
 		.post("/").type(CountryPojo.class)
 			//swagger
 			.description("Send country")
@@ -110,6 +141,15 @@ public class MyBuilder extends RouteBuilder {
 	
 	//Helper methods used in these routes. It's a good idea to keep them in the RouteBuilder for readability if they are simple.
 	//In a real world scenario the response is probably more complicated based on the current exchange
+	public static CitiesResponse createResponse(@ExchangeProperty("country") String country, @Body List<String> cities) {
+		CitiesResponse citiesResponse = new CitiesResponse();
+		citiesResponse.setCode(SUCC.getCode());
+		citiesResponse.setMessage(SUCC.getMessage());
+		citiesResponse.setCountry(country);
+		citiesResponse.setCities(cities);
+		return citiesResponse;
+	}
+	
 	public static ApiResponse errorResponse(int code, String message){
 		return new ApiResponse(code, message);
 	}
@@ -125,6 +165,11 @@ public class MyBuilder extends RouteBuilder {
 			message = ex.getMessage();
 		}
 		return new ApiResponse(5000, message);
+	}
+	
+	//Convert xml path NodeList to List
+	public static List<String> convertNodeListToList(@XPath("//NewDataSet/Table/City/text()") NodeList nodeList) {
+		return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).map(n->n.getNodeValue()).collect(Collectors.toList());
 	}
 	
 }

@@ -4,11 +4,16 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RestConfiguration extends RouteBuilder {
 	private final static Logger log = LoggerFactory.getLogger(RestConfiguration.class);
+	
+	@Autowired
+	ServerProperties serverProperties;
 	
 	@Override
 	public void configure() throws Exception {
@@ -31,7 +36,8 @@ public class RestConfiguration extends RouteBuilder {
 			.contextPath("/api") //base.path swagger property; use the mapping URL set for CamelServlet camel.component.servlet.mapping.contextPath
 			.apiProperty("api.title", "Example REST api")
 			.apiProperty("api.version", "1.0")
-			.apiProperty("schemes", "" ) //Setting empty string as scheme to support relative urls
+			//.apiProperty("schemes", "" ) //Setting empty string as scheme to support relative urls
+			.apiProperty("schemes", serverProperties.getSsl() != null && serverProperties.getSsl().isEnabled() ? "https" : "http" )
 			.apiProperty("host", "") //Setting empty string as host so swagger-ui make relative url calls. By default 0.0.0.0 is used
 			;
 	}
