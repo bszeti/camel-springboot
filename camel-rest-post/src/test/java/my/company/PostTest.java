@@ -1,10 +1,6 @@
 package my.company;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.EndpointInject;
-import org.apache.camel.Exchange;
-import org.apache.camel.ProducerTemplate;
-import org.apache.camel.ServiceStatus;
+import org.apache.camel.*;
 import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.builder.ExchangeBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -27,10 +23,10 @@ import my.company.model.CountryApiPojo;
 import my.company.model.UserApiPojo;
 
 @RunWith(CamelSpringBootRunner.class)
-@UseAdviceWith
+@UseAdviceWith //The context won't start automatically
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode=ClassMode.AFTER_CLASS) //classMode default value. Shutdown spring context after class (all tests are run using the same context)
-public class RestTest extends Assert {
+public class PostTest extends Assert {
 
 	//Local server port can be injected also available in the context as {{local.server.port}}.
 	@LocalServerPort
@@ -43,19 +39,24 @@ public class RestTest extends Assert {
 
 	@Autowired
 	protected ProducerTemplate template;
+	//or can use FluentProducerTemplate
+	@Produce(uri = "undertow:http://localhost:{{local.server.port}}/api/user")
+	FluentProducerTemplate userApiFluentProducer;
 
 	@Autowired
 	CamelContext context;
 
 	@Before
 	public void before() throws Exception {
-		//Before is called for each methods, but we only want to run this once
+		//Before is called for each methods, but we only want to run this once as the context is created once for the whole class
 		if (context.getStatus()==ServiceStatus.Stopped) {
 			
 			context.getRouteDefinition("post-user").adviceWith(context, new AdviceWithRouteBuilder() {
 				@Override
 				public void configure() throws Exception {
-					weaveById("received-user").before().to(resultEndpointUser.getEndpointUri());
+					weaveById("received-user").before()
+							.to("log:my.company.PostTest?showAll=true&multiline=true")
+							.to(resultEndpointUser.getEndpointUri());
 	
 				}
 			});
@@ -70,7 +71,29 @@ public class RestTest extends Assert {
 			
 			//Manually start context after adviceWith
 			context.start();
+		} else {
+			//If context was already started (there was an earlier test run) then reset mock endpoints otherwise the tests can interfere
+			resultEndpointUser.reset();
+			resultEndpointCountry.reset();
 		}
+	}
+
+
+	@Test
+	public void postUserApi() throws Exception {
+		UserApiPojo user = new UserApiPojo("Test User", 20);
+		resultEndpointUser.expectedBodiesReceived(user);
+		resultEndpointUser.expectedMessageCount(1);
+
+		//Send a message to user api post endpoint using the FluentProducerTemplate
+		userApiFluentProducer.withHeader(Exchange.HTTP_METHOD, HttpMethod.POST)
+				.withHeader(Exchange.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON)
+				.withBody("{\"age\": 20, \"name\": \"Test User\"}")
+				.send();
+
+		resultEndpointUser.assertIsSatisfied();
+
 	}
 
 	@Test
@@ -89,6 +112,7 @@ public class RestTest extends Assert {
 		//Send a message to each post endpoint
 		ExchangeBuilder builder = ExchangeBuilder.anExchange(context)
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.POST)
+				.withHeader(Exchange.CONTENT_TYPE, MediaType.APPLICATION_JSON)
 				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON);
 		Exchange outExchangeUser = builder.withBody("{\"age\": 21, \"name\": \"My Name\"}").build();
 		Exchange outExchangeCountry = builder.withBody("{\"iso\": \"EN\", \"country\": \"England\"}").build();

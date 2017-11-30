@@ -1,8 +1,9 @@
-package my.company.utils;
+package my.company;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import my.company.utils.ContinueOnExceptionStrategy;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.apache.camel.test.junit4.CamelTestSupport;
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Test example based on CamelTestSupport.
+ * Test example based on CamelTestSupport, it doesn't start the SpringBoot application only a CamelContext with the RouteBuilder defined here.
  * Having CamelTestSupport tests and CamelSpringBootRunner tests in the same project can cause problems because CamelSpringBootRunner disables CamelContext startup during init. 
  * So if the CamelTestSupport test is run before the CamelSpringBootRunner, the context won't start. 
  * Use maven with maven-surefire-plugin v2.19.1+ or reuseForks=false to avoid this problem. It still can happen in Eclipse running tests for example.

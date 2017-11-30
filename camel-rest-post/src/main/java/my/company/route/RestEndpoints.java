@@ -205,12 +205,12 @@ public class RestEndpoints extends RouteBuilder {
 		}
 		return new ApiResponse(code, message);
 	}
-	
+
 	//Convert xml path NodeList to List
 	public static List<String> convertNodeListToList(@XPath("//NewDataSet/Table/City/text()") NodeList nodeList) {
 		return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).map(n->n.getNodeValue()).collect(Collectors.toList());
 	}
-	
+
 	//Create an empty synchronized List<City>
 	public static List<City> emptyCityList(){
 		return Collections.synchronizedList(new ArrayList<City>());

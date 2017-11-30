@@ -87,6 +87,15 @@ public class UserApiPojo {
 			return false;
 		return true;
 	}
-	
-	
+
+	//Used in log for example
+	@Override
+	public String toString() {
+		return "UserApiPojo{" +
+				"name='" + name + '\'' +
+				", age=" + age +
+				", createdDate=" + createdDate +
+				", createdLocalDate=" + createdLocalDate +
+				'}';
+	}
 }

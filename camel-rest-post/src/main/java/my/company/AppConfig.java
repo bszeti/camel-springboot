@@ -29,7 +29,7 @@ import my.company.utils.BasicDataSourceMixIn;
  *
  */
 @Configuration
-public class ApplicationBeans {
+public class AppConfig {
 
 	/**
 	 * Two datasources. One mast be marked as primary for autowired.
@@ -46,7 +46,7 @@ public class ApplicationBeans {
 		return new Properties();
 	}
 	
-	@Bean(value = "cityInfoDS", destroyMethod = "")
+	@Bean(value = "cityInfoDS", destroyMethod = "") //Disable destroy method here to avoid warning for duplicated shutdown
 	@Primary
 	public DataSource primaryDataSource() throws Exception {
 		return BasicDataSourceFactory.createDataSource(primaryDataSourceProperties());

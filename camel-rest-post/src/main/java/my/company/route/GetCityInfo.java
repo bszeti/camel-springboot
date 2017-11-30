@@ -70,7 +70,7 @@ public class GetCityInfo extends RouteBuilder {
 			@Body List<Map<String,Object>> resultset, 
 			@ExchangeProperty("city") City city) {
 		List<String> zips = resultset.stream()
-				.map(m->(String)m.get("ZIPCODE"))
+				.map(m->(String)m.get("ZIP"))
 				.collect(Collectors.toList());
 		city.setZips(zips);
 	}

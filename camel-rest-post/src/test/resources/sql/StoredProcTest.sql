@@ -1,0 +1,6 @@
+INSERT INTO GETZIPS_RESPONSE(city,zip)
+VALUES
+('AA','ZIP-AA'),
+('BB','ZIP-BB1'),
+('BB','ZIP-BB2'),
+('CC','ZIP-CC');

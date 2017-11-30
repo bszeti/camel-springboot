@@ -14,6 +14,11 @@ public class City {
 		this.name = cityName;
 	}
 
+	public City(String cityName, List<String> zips) {
+		this.name = cityName;
+		this.zips = zips;
+	}
+
 	public String getName() {
 		return name;
 	}
