@@ -30,7 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import my.company.model.ApiResponse;
 import my.company.model.CitiesResponse;
-import my.company.route.MyBuilder;
+import my.company.route.RestEndpoints;
 import net.webservicex.GlobalWeatherSoap;
 
 @RunWith(CamelSpringBootRunner.class)
@@ -89,12 +89,12 @@ public class SoapCallWithObjectTest extends Assert {
 	@Test
 	public void successfulResponse() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		headers.set(MyBuilder.HEADER_BUSINESSID, "successfulResponse-test");
+		headers.set(RestEndpoints.HEADER_BUSINESSID, "successfulResponse-test");
 		ResponseEntity<CitiesResponse> citiesResponse = testRestTemplate.exchange("/api/country/TEST/cities",
 				HttpMethod.GET, new HttpEntity(headers), CitiesResponse.class);
 
 		assertEquals(200, citiesResponse.getStatusCodeValue());
-		assertEquals("successfulResponse-test", citiesResponse.getHeaders().getFirst(MyBuilder.HEADER_BUSINESSID));
+		assertEquals("successfulResponse-test", citiesResponse.getHeaders().getFirst(RestEndpoints.HEADER_BUSINESSID));
 		assertEquals("TEST", citiesResponse.getBody().getCountry());
 		// Check if lists are equal ignoring the ordering of elements
 		assertTrue(CollectionUtils.isEqualCollection(

@@ -21,7 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import my.company.model.ApiResponse;
-import my.company.route.MyBuilder;
+import my.company.route.RestEndpoints;
 
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -53,7 +53,7 @@ public class BusinessIdTest extends Assert {
 				.send();
 		
 		assertEquals(200, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
-		assertTrue(response.getIn().getHeader(MyBuilder.HEADER_BUSINESSID,String.class).length() == 36);
+		assertTrue(response.getIn().getHeader(RestEndpoints.HEADER_BUSINESSID,String.class).length() == 36);
 	}
 
 	@Test
@@ -62,11 +62,11 @@ public class BusinessIdTest extends Assert {
 		Exchange response = fluentProducerTemplate.to("undertow:http://localhost:{{local.server.port}}/api/user/1")
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.GET)
 				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON)
-				.withHeader(MyBuilder.HEADER_BUSINESSID,"X")
+				.withHeader(RestEndpoints.HEADER_BUSINESSID,"X")
 				.send();
 		
 		assertEquals(500, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
-		assertEquals("X",response.getIn().getHeader(MyBuilder.HEADER_BUSINESSID,String.class));
+		assertEquals("X",response.getIn().getHeader(RestEndpoints.HEADER_BUSINESSID,String.class));
 		
 		String responseBody = response.getIn().getBody(String.class); //Body is byte[] (or may be InputStream in case of other http clients)
 		log.info("body: {}",responseBody);

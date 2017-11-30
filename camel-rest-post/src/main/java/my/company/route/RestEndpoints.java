@@ -32,11 +32,10 @@ import my.company.model.City;
 import my.company.model.CountryApiPojo;
 import my.company.model.HeaderValidationsPojo;
 import my.company.model.UserApiPojo;
-import my.company.utils.ContinueOnExceptionStrategy;
 
-@Component("mybuilder")
-public class MyBuilder extends RouteBuilder {
-	private final static Logger log = LoggerFactory.getLogger(MyBuilder.class);
+@Component("restbuilder")
+public class RestEndpoints extends RouteBuilder {
+	private final static Logger log = LoggerFactory.getLogger(RestEndpoints.class);
 	
 	private final static UserApiPojo DUMMY_USER = new UserApiPojo("JohnDoe", 21);
 	private final static ApiResponse SUCC = new ApiResponse(0,"OK");
@@ -50,20 +49,24 @@ public class MyBuilder extends RouteBuilder {
 		 ************************/
 		onException(JsonProcessingException.class)
 			.handled(true)
-			.to("log:"+MyBuilder.class.getName()+"?showAll=true&multiline=true&level=ERROR")
+			.to("log:"+RestEndpoints.class.getName()+"?showAll=true&multiline=true&level=ERROR")
 			.removeHeaders("*",HEADER_BUSINESSID) //don't let message headers get inserted in the http response
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(400))
-			.bean("mybuilder","errorResponse(4000,'Invalid json content')");
+			.bean("restbuilder","errorResponse(4000,'Invalid json content')");
 			
 		onException(Exception.class)
 			.handled(true)
-			.to("log:"+MyBuilder.class.getName()+"?showAll=true&multiline=true&level=ERROR")
+			.to("log:"+RestEndpoints.class.getName()+"?showAll=true&multiline=true&level=ERROR")
 			.removeHeaders("*",HEADER_BUSINESSID) //don't let message headers get inserted in the http response
 			.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
-			.bean("mybuilder","errorResponse(*)");
+			.bean("restbuilder","errorResponse(*)");
 		
 		/************************
 		 * Rest endpoints. Multiple can be defined (in multiple RouteBuilder), but should map different URL path
+		 ************************/
+
+		/************************
+		 * Simple api with post and get
 		 ************************/
 		rest("/user").description("User API")
 			.produces(MediaType.APPLICATION_JSON).consumes(MediaType.APPLICATION_JSON)
@@ -86,7 +89,7 @@ public class MyBuilder extends RouteBuilder {
 		.post("/").type(UserApiPojo.class)
 			//swagger
 			.description("Send user")
-			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transactionid. Defaults to a random uuid").dataType("string").endParam()
+			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transaction id. Defaults to a random uuid").dataType("string").endParam()
 			.responseMessage().code(200).responseModel(ApiResponse.class).endResponseMessage() //OK
 			.responseMessage().code(400).responseModel(ApiResponse.class).message("Unexpected body").endResponseMessage() //Wrong input
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
@@ -96,8 +99,11 @@ public class MyBuilder extends RouteBuilder {
 				.setBody(constant(SUCC))
 				.removeHeaders("*",HEADER_BUSINESSID)
 			.endRest();
-		
-		//Another rest dsl
+
+		/************************
+		 * A complex get endpoint calling a SOAP service and stored procedure to build response
+		 * The post endpoint here only demonstrates that a different unmarshalling type can be set than in the previous post endpoint
+		 ************************/
 		rest("/country").description("Country API")
 			.skipBindingOnErrorCode(false)
 		.get("/{country}/cities")
@@ -116,25 +122,28 @@ public class MyBuilder extends RouteBuilder {
 				.removeHeaders("*", HEADER_BUSINESSID)
 				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
 				.to("cxf:bean:cxfGlobalWeather?synchronous=true") //Use synchronous to use the same thread to make the http call
-				.setBody(method(MyBuilder.class,"convertNodeListToList"))
+				.setBody(method(RestEndpoints.class,"convertNodeListToList"))
 				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
 				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
 				.setProperty("cityNames",body())
+
+				//We'd like to get more information (zip code) for the database for each city,
+				//but also give back partial response in case of errors, and show the error message next to the city
+				//Create an empty list, it will be populated from inside the splitter
+				.setProperty("cities",method(RestEndpoints.class,"emptyCityList"))
 				
-				//Lookup some information (zip codes) from a database for each city
-				.setProperty("cities",method(MyBuilder.class,"emptyCityList"))
-				
+
 				//Splitter gives back the original Exchange if no aggregationStrategy is set (multicast gives back the last Exchange!),
-				//an exception inside the splitter is only propagated if not handled(true) 
+				//an exception inside the splitter is only propagated if it's not handled(true)
 				//stopOnException is false by default, so we don't have to use the ContinueOnExceptionStrategy
 				.split(exchangeProperty("cityNames")).parallelProcessing().executorServiceRef("myThreadPool")
-					.setProperty("city",method(MyBuilder.class, "newCity"))
+					.setProperty("city",method(RestEndpoints.class, "newCity"))
 					.to("direct:getCityInfo")
 				.end()
 				//At this point the City objects in the list should be populated with the zip codes or errors
 				
 				//Response object
-				.setBody(method(MyBuilder.class,"createResponse"))
+				.setBody(method(RestEndpoints.class,"createResponse"))
 				.removeHeaders("*", HEADER_BUSINESSID)
 			.endRest()
 		.post("/").type(CountryApiPojo.class)
@@ -146,8 +155,9 @@ public class MyBuilder extends RouteBuilder {
 				.setBody(constant(null))//Don't return anything in the body, so no responseModel() or outType() is required
 			.endRest()
 		;
-		
-		//Secured with basic authentication
+		/************************
+		/* Secured route with basic authentication
+		 ************************/
 		rest("/secure").description("Basic auth. Try name:'user' passwd:'secret'.")
 		.get().outType(ApiResponse.class)
 			.route().routeId("secure-get")
@@ -159,6 +169,8 @@ public class MyBuilder extends RouteBuilder {
 	}
 	
 	//Helper methods used in these routes. It's a good idea to keep them in the RouteBuilder for readability if they are simple.
+
+	//Build succesful response pojo
 	public static CitiesResponse createResponse(@ExchangeProperty("country") String country, @ExchangeProperty("cities") List<City> cities) {
 		CitiesResponse citiesResponse = new CitiesResponse();
 		citiesResponse.setCode(SUCC.getCode());
@@ -167,7 +179,8 @@ public class MyBuilder extends RouteBuilder {
 		citiesResponse.setCities(cities);
 		return citiesResponse;
 	}
-	
+
+	//Build error response pojo
 	public static ApiResponse errorResponse(int code, String message){
 		return new ApiResponse(code, message);
 	}
