@@ -14,14 +14,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <!-- Camel 2.18.2 is needed -->
-<!--     <fabric8.version>2.2.217</fabric8.version> -->
     <fabric8.version>3.0.8</fabric8.version>
-<!--     <fabric8.version>2.3.4</fabric8.version> -->
-    <!-- Camel 2.18.1.redhat-000015 also works -->
-    <!-- <fabric8.version>2.2.170.redhat-000013</fabric8.version> -->
-    
     <swagger-ui.version>3.1.4</swagger-ui.version>
+    <commons-collections4.version>4.1</commons-collections4.version>
 
     <!-- plugins -->
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
@@ -29,6 +24,7 @@
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
     <spring-boot-plugin.version>1.4.1.RELEASE</spring-boot-plugin.version>
     <fabric8.maven.plugin.version>3.1.80.redhat-000010</fabric8.maven.plugin.version>
+    <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -91,9 +87,13 @@
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-jackson-starter</artifactId>
     </dependency>
-        <dependency>
+    <dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-cxf-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-sql-starter</artifactId>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -177,6 +177,29 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      
+      <!-- Generate git.properties used by /info endpoint -->
+	<plugin>
+		<groupId>pl.project13.maven</groupId>
+		<artifactId>git-commit-id-plugin</artifactId>
+		<version>${git-commit-id-plugin.version}</version>
+		<executions>
+			<execution>
+				<id>get-the-git-infos</id>
+				<goals>
+					<goal>revision</goal>
+				</goals>
+			</execution>
+
+		</executions>
+		<!-- Configuration is copied from spring-boot-starter-parent -->
+		<configuration>
+			<verbose>true</verbose>
+			<dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+			<generateGitPropertiesFile>true</generateGitPropertiesFile>
+			<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+		</configuration>
       </plugin>
     </plugins>
     

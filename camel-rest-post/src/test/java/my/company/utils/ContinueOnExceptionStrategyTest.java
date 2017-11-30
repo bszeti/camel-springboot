@@ -15,12 +15,12 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * BlockJUnit4ClassRunner is the default Junit4 runner.
+ * Test example based on CamelTestSupport.
  * Having CamelTestSupport tests and CamelSpringBootRunner tests in the same project can cause problems because CamelSpringBootRunner disables CamelContext startup during init. 
  * So if the CamelTestSupport test is run before the CamelSpringBootRunner, the context won't start. 
  * Use maven with maven-surefire-plugin v2.19.1+ or reuseForks=false to avoid this problem. It still can happen in Eclipse running tests for example.
  */
-@RunWith(BlockJUnit4ClassRunner.class)
+@RunWith(BlockJUnit4ClassRunner.class) //BlockJUnit4ClassRunner is actually the default Junit4 runner
 public class ContinueOnExceptionStrategyTest extends CamelTestSupport {
 	private static final Logger log = LoggerFactory.getLogger(ContinueOnExceptionStrategyTest.class);
 

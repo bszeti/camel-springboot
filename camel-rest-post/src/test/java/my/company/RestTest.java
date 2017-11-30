@@ -23,8 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
-import my.company.model.CountryPojo;
-import my.company.model.UserPojo;
+import my.company.model.CountryApiPojo;
+import my.company.model.UserApiPojo;
 
 @RunWith(CamelSpringBootRunner.class)
 @UseAdviceWith
@@ -76,11 +76,11 @@ public class RestTest extends Assert {
 	@Test
 	public void testMultiplePostTypes() throws Exception {
 
-		UserPojo user = new UserPojo("My Name", 21);
+		UserApiPojo user = new UserApiPojo("My Name", 21);
 		resultEndpointUser.expectedBodiesReceived(user);
 		resultEndpointUser.expectedMessageCount(1);
 
-		CountryPojo country = new CountryPojo();
+		CountryApiPojo country = new CountryApiPojo();
 		country.setCountry("England");
 		country.setIso("EN");
 		resultEndpointCountry.expectedBodiesReceived(country);

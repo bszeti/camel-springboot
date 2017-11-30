@@ -1,6 +1,6 @@
 package my.company.model;
 
-public class CountryPojo {
+public class CountryApiPojo {
 	private String iso;
 	private String country;
 	
@@ -36,7 +36,7 @@ public class CountryPojo {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CountryPojo other = (CountryPojo) obj;
+		CountryApiPojo other = (CountryApiPojo) obj;
 		if (country == null) {
 			if (other.country != null)
 				return false;

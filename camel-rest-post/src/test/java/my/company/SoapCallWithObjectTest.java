@@ -1,11 +1,14 @@
 package my.company;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
+import org.apache.camel.test.spring.MockEndpointsAndSkip;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.cxf.transport.servlet.CXFServlet;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,6 +37,7 @@ import net.webservicex.GlobalWeatherSoap;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext
+@MockEndpointsAndSkip("direct:getCityInfo")
 public class SoapCallWithObjectTest extends Assert {
 
 	@Autowired
@@ -92,7 +96,11 @@ public class SoapCallWithObjectTest extends Assert {
 		assertEquals(200, citiesResponse.getStatusCodeValue());
 		assertEquals("successfulResponse-test", citiesResponse.getHeaders().getFirst(MyBuilder.HEADER_BUSINESSID));
 		assertEquals("TEST", citiesResponse.getBody().getCountry());
-		assertEquals(Arrays.asList("AA","BB"), citiesResponse.getBody().getCities());
+		// Check if lists are equal ignoring the ordering of elements
+		assertTrue(CollectionUtils.isEqualCollection(
+				Arrays.asList("AA","BB"),
+				citiesResponse.getBody().getCities().stream().map((c)->c.getName()).collect(Collectors.toList())
+		));
 
 	}
 	

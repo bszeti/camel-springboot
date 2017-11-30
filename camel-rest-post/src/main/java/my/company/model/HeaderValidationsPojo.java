@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 
 
-public class HeadersPojo {
+public class HeaderValidationsPojo {
 	@Max(value=99)
 	@NotNull(message="is required")
 	private Long id;

@@ -25,6 +25,10 @@
 		<property name="message" value="OK" />
 	</bean>
 	
+	<!-- Can set the number of parallel splitter runs this way -->
+	<!-- Lazy init is required otherwise the thread pool may not show up in JMX -->
+	<camel:threadPool id="myThreadPool" poolSize="8" maxPoolSize="16" threadName="Splitter" maxQueueSize="0" rejectedPolicy="CallerRuns"/>
+	
 	<!-- CXF -->
 	<cxf:cxfEndpoint 
 		id="cxfGlobalWeather"

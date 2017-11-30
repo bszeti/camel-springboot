@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class UserPojo {
+public class UserApiPojo {
 	private String name;
 	private Integer age;
 	
@@ -19,10 +19,10 @@ public class UserPojo {
 	private LocalDateTime createdLocalDate = LocalDateTime.now();
 
 	//Constructors
-	public UserPojo() {
+	public UserApiPojo() {
 	}
 
-	public UserPojo(String name, Integer age) {
+	public UserApiPojo(String name, Integer age) {
 		this.name = name;
 		this.age = age;
 	}
@@ -74,7 +74,7 @@ public class UserPojo {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UserPojo other = (UserPojo) obj;
+		UserApiPojo other = (UserApiPojo) obj;
 		if (age == null) {
 			if (other.age != null)
 				return false;

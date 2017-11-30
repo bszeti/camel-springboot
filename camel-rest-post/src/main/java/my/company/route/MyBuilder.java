@@ -28,15 +28,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import my.company.model.ApiResponse;
 import my.company.model.CitiesResponse;
-import my.company.model.CountryPojo;
-import my.company.model.HeadersPojo;
-import my.company.model.UserPojo;
+import my.company.model.City;
+import my.company.model.CountryApiPojo;
+import my.company.model.HeaderValidationsPojo;
+import my.company.model.UserApiPojo;
+import my.company.utils.ContinueOnExceptionStrategy;
 
 @Component("mybuilder")
 public class MyBuilder extends RouteBuilder {
 	private final static Logger log = LoggerFactory.getLogger(MyBuilder.class);
 	
-	private final static UserPojo DUMMY_USER = new UserPojo("JohnDoe", 21);
+	private final static UserApiPojo DUMMY_USER = new UserApiPojo("JohnDoe", 21);
 	private final static ApiResponse SUCC = new ApiResponse(0,"OK");
 	
 	public final static String HEADER_BUSINESSID = "businessId";
@@ -71,17 +73,17 @@ public class MyBuilder extends RouteBuilder {
 			.description("Query user")
 			.param().name("id").type(RestParamType.path).description("Id of the user. Must be number and less than 100.").required(true).dataType("string").endParam()
 			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transactionid. Defaults to a random uuid").required(false).dataType("string").endParam()
-			.responseMessage().code(200).responseModel(UserPojo.class).endResponseMessage() //OK
+			.responseMessage().code(200).responseModel(UserApiPojo.class).endResponseMessage() //OK
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
 			//route
 			.route().routeId("user-get")
 				.log("Get user: ${header.id}")
-				.setBody().simple("${headers}",HeadersPojo.class)
+				.setBody().simple("${headers}",HeaderValidationsPojo.class)
 				.to("bean-validator:validateHeaders") //or .validate().simple("${header.id} < 100")
 				.setBody(constant(DUMMY_USER))
 				.removeHeaders("*","businessId")
 			.endRest()
-		.post("/").type(UserPojo.class)
+		.post("/").type(UserApiPojo.class)
 			//swagger
 			.description("Send user")
 			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transactionid. Defaults to a random uuid").dataType("string").endParam()
@@ -108,7 +110,8 @@ public class MyBuilder extends RouteBuilder {
 				//Save input headers/values needed later as ExchangeProperty
 				.setProperty("country",header("country"))
 				
-				//CXF call
+				//Get cities for a country
+				//Call SOAP servce with CXF
 				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (insted of GetCitiesByCountryRequest
 				.removeHeaders("*", HEADER_BUSINESSID)
 				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
@@ -116,13 +119,25 @@ public class MyBuilder extends RouteBuilder {
 				.setBody(method(MyBuilder.class,"convertNodeListToList"))
 				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
 				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
-				.setProperty("cities",body())
+				.setProperty("cityNames",body())
+				
+				//Lookup some information (zip codes) from a database for each city
+				.setProperty("cities",method(MyBuilder.class,"emptyCityList"))
+				
+				//Splitter gives back the original Exchange if no aggregationStrategy is set (multicast gives back the last Exchange!),
+				//an exception inside the splitter is only propagated if not handled(true) 
+				//stopOnException is false by default, so we don't have to use the ContinueOnExceptionStrategy
+				.split(exchangeProperty("cityNames")).parallelProcessing().executorServiceRef("myThreadPool")
+					.setProperty("city",method(MyBuilder.class, "newCity"))
+					.to("direct:getCityInfo")
+				.end()
+				//At this point the City objects in the list should be populated with the zip codes or errors
 				
 				//Response object
 				.setBody(method(MyBuilder.class,"createResponse"))
 				.removeHeaders("*", HEADER_BUSINESSID)
 			.endRest()
-		.post("/").type(CountryPojo.class)
+		.post("/").type(CountryApiPojo.class)
 			//swagger
 			.description("Send country")
 			.responseMessage().code(200).endResponseMessage()
@@ -132,6 +147,7 @@ public class MyBuilder extends RouteBuilder {
 			.endRest()
 		;
 		
+		//Secured with basic authentication
 		rest("/secure").description("Basic auth. Try name:'user' passwd:'secret'.")
 		.get().outType(ApiResponse.class)
 			.route().routeId("secure-get")
@@ -143,8 +159,7 @@ public class MyBuilder extends RouteBuilder {
 	}
 	
 	//Helper methods used in these routes. It's a good idea to keep them in the RouteBuilder for readability if they are simple.
-	//In a real world scenario the response is probably more complicated based on the current exchange
-	public static CitiesResponse createResponse(@ExchangeProperty("country") String country, @Body List<String> cities) {
+	public static CitiesResponse createResponse(@ExchangeProperty("country") String country, @ExchangeProperty("cities") List<City> cities) {
 		CitiesResponse citiesResponse = new CitiesResponse();
 		citiesResponse.setCode(SUCC.getCode());
 		citiesResponse.setMessage(SUCC.getMessage());
@@ -181,6 +196,18 @@ public class MyBuilder extends RouteBuilder {
 	//Convert xml path NodeList to List
 	public static List<String> convertNodeListToList(@XPath("//NewDataSet/Table/City/text()") NodeList nodeList) {
 		return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).map(n->n.getNodeValue()).collect(Collectors.toList());
+	}
+	
+	//Create an empty synchronized List<City>
+	public static List<City> emptyCityList(){
+		return Collections.synchronizedList(new ArrayList<City>());
+	}
+	
+	//Create a new City object and add it to response list
+	public static City newCity(@Body String cityName, @ExchangeProperty("cities") List<City> cities) {
+		City city = new City(cityName);
+		cities.add(city);
+		return city;
 	}
 	
 }

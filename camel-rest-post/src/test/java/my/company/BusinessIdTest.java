@@ -4,6 +4,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.FluentProducerTemplate;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
+import org.apache.camel.test.spring.MockEndpointsAndSkip;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import my.company.route.MyBuilder;
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext
+@MockEndpointsAndSkip("direct:getCityInfo") //pattern supports wildcard "direct:get*" or regexp "direct:.*|cxf:.*"
 public class BusinessIdTest extends Assert {
 	private static final Logger log = LoggerFactory.getLogger(BusinessIdTest.class);
 
@@ -71,6 +73,17 @@ public class BusinessIdTest extends Assert {
 		ApiResponse apiResponse = objectmapper.readValue(responseBody, ApiResponse.class); //Unmarshall manually with Jackson
 		assertEquals("'businessId' length must be between 16 and 48", apiResponse.getMessage());
 		
+	}
+	
+	@Test
+	public void testConfigProps() throws Exception {
+		// Call get
+		Exchange response = fluentProducerTemplate.to("undertow:http://localhost:{{local.server.port}}/configprops")
+				.withHeader(Exchange.HTTP_METHOD, HttpMethod.GET)
+				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON)
+				.send();
+		
+		assertEquals(200, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
 	}
 
 }

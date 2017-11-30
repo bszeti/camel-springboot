@@ -4,7 +4,7 @@ import java.util.List;
 
 public class CitiesResponse extends ApiResponse {
 	private String country;
-	private List<String> cities;
+	private List<City> cities;
 
 	public String getCountry() {
 		return country;
@@ -14,11 +14,11 @@ public class CitiesResponse extends ApiResponse {
 		this.country = country;
 	}
 
-	public List<String> getCities() {
+	public List<City> getCities() {
 		return cities;
 	}
 
-	public void setCities(List<String> cities) {
+	public void setCities(List<City> cities) {
 		this.cities = cities;
 	}
 
