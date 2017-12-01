@@ -1,5 +1,8 @@
 package my.company;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import my.company.model.ApiResponse;
+import my.company.route.RestEndpoints;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.FluentProducerTemplate;
@@ -17,11 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import my.company.model.ApiResponse;
-import my.company.route.RestEndpoints;
 
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

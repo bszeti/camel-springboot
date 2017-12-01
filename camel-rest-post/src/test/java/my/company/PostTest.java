@@ -1,5 +1,7 @@
 package my.company;
 
+import my.company.model.CountryApiPojo;
+import my.company.model.UserApiPojo;
 import org.apache.camel.*;
 import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.builder.ExchangeBuilder;
@@ -18,9 +20,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-
-import my.company.model.CountryApiPojo;
-import my.company.model.UserApiPojo;
 
 @RunWith(CamelSpringBootRunner.class)
 @UseAdviceWith //The context won't start automatically

@@ -1,26 +1,30 @@
 package my.company;
 
-import java.util.Map;
-
+import my.company.model.HeaderValidationsPojo;
+import my.company.utils.CustomMDCBreadCrumbIdUnitOfWork;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.converter.dozer.DozerTypeConverter;
 import org.apache.camel.spi.UnitOfWork;
 import org.apache.camel.spi.UnitOfWorkFactory;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
+import org.apache.commons.dbcp2.BasicDataSourceFactory;
 import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import my.company.model.HeaderValidationsPojo;
-import my.company.utils.CustomMDCBreadCrumbIdUnitOfWork;
+import javax.sql.DataSource;
+import java.util.Map;
+import java.util.Properties;
 
 @SpringBootApplication
 // load regular Spring XML file from the classpath
@@ -105,6 +109,38 @@ public class Application {
     	@RequestMapping("/")
     	public String hello() { return "Hello World"; }
     }
-    
+
+
+    /**
+     * Two datasources. One mast be marked as primary for autowired.
+     * The BasicDataSource properties (including pooling) is set from configuration.
+     * destroyMethod is set to null to avoid notification of double shutdown
+     *
+     * SpringBoot's spring.datasource.* auto-configuration works as long as only one datasource is required.
+     * This example shows a simple way to create two data sources with properties taken from the config file
+     * (The @ConfigurationProperties could also be used on the BasicDataSource instance directly, but that causes problems with the /configprops actuator endpoint)
+     */
+    @Bean
+    @ConfigurationProperties("cityInfo.datasource")
+    public Properties primaryDataSourceProperties() {
+        return new Properties();
+    }
+
+    @Bean(value = "cityInfoDS", destroyMethod = "") //Disable destroy method here to avoid warning for duplicated shutdown
+    @Primary
+    public DataSource primaryDataSource() throws Exception {
+        return BasicDataSourceFactory.createDataSource(primaryDataSourceProperties());
+    }
+
+    @Bean
+    @ConfigurationProperties("another.datasource")
+    public Properties anotherDataSourceProperties() {
+        return new Properties();
+    }
+
+    @Bean(destroyMethod = "")
+    public DataSource anotherDataSource() throws Exception {
+        return BasicDataSourceFactory.createDataSource(anotherDataSourceProperties());
+    }
 	
 }

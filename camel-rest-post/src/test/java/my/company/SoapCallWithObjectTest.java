@@ -1,10 +1,10 @@
 package my.company;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
+import my.company.model.ApiResponse;
+import my.company.model.CitiesResponse;
+import my.company.route.RestEndpoints;
+import net.webservicex.GlobalWeatherSoap;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
@@ -29,10 +29,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-import my.company.model.ApiResponse;
-import my.company.model.CitiesResponse;
-import my.company.route.RestEndpoints;
-import net.webservicex.GlobalWeatherSoap;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @RunWith(CamelSpringBootRunner.class)
 @ActiveProfiles("test")

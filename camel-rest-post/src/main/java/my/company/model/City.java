@@ -1,7 +1,6 @@
 package my.company.model;
 
 import java.util.List;
-import java.util.Objects;
 
 public class City {
 	private String name;

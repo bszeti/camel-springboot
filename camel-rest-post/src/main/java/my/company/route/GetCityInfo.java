@@ -1,11 +1,10 @@
 package my.company.route;
 
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.camel.*;
+import my.company.model.City;
+import org.apache.camel.Body;
+import org.apache.camel.ExchangeException;
+import org.apache.camel.ExchangeProperty;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
@@ -13,7 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import my.company.model.City;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class GetCityInfo extends RouteBuilder {
@@ -41,7 +43,7 @@ public class GetCityInfo extends RouteBuilder {
 		
 		//An City object is expected as exchangeProperty.city having the name already.
 		//This object will be enriched by the route. This is easier than writing an AggregatorStrategy
-		from("direct:getCityInfo").routeId("getCityInfo")
+		from("direct:getCityZips").routeId("getCityZips")
 			//prepare and call stored proceedure
 			.removeHeaders("*", RestEndpoints.HEADER_BUSINESSID)
 			.setHeader("cityName", simple("${exchangeProperty.city?.name}"))

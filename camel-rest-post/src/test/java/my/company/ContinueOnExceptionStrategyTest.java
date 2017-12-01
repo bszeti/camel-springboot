@@ -1,8 +1,5 @@
 package my.company;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import my.company.utils.ContinueOnExceptionStrategy;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
@@ -13,6 +10,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

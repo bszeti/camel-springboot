@@ -1,10 +1,10 @@
 package my.company.utils;
 
-import java.util.UUID;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.MDCUnitOfWork;
 import org.slf4j.MDC;
+
+import java.util.UUID;
 
 /**
  * A custom unit of work that expects/generated an business Id and uses it in MDC logging as camel.breadcrumbId

@@ -1,10 +1,9 @@
 package my.company.utils;
 
-import org.apache.commons.dbcp2.BasicDataSource;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 @JsonAutoDetect(fieldVisibility=Visibility.NONE, getterVisibility=Visibility.NONE, isGetterVisibility=Visibility.NONE)
 public abstract class BasicDataSourceMixIn extends BasicDataSource{

@@ -1,14 +1,7 @@
 package my.company.route;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import javax.ws.rs.core.MediaType;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import my.company.model.*;
 import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.bean.validator.BeanValidationException;
@@ -21,14 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.NodeList;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import my.company.model.ApiResponse;
-import my.company.model.CitiesResponse;
-import my.company.model.City;
-import my.company.model.CountryApiPojo;
-import my.company.model.HeaderValidationsPojo;
-import my.company.model.UserApiPojo;
+import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component("restbuilder")
 public class RestEndpoints extends RouteBuilder {
@@ -108,49 +100,7 @@ public class RestEndpoints extends RouteBuilder {
 			.description("Get cities of country by calling s SOAP service")
 			.responseMessage().code(200).responseModel(CitiesResponse.class).endResponseMessage() //OK
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
-			.route().routeId("country-get-cities")
-				.onException(ValidationException.class)
-					.handled(true)
-					.removeHeaders("*",HEADER_BUSINESSID)
-					.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(404))
-					.bean("restbuilder","errorResponse(4000,'Not found')")
-					.end()
-
-				.log("Getting cities for ${header.country}")
-				
-				//Save input headers/values needed later as ExchangeProperty
-				.setProperty("country",header("country"))
-				
-				//Get cities for a country
-				//Call SOAP servce with CXF
-				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (insted of GetCitiesByCountryRequest
-				.removeHeaders("*", HEADER_BUSINESSID)
-				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
-				.to("cxf:bean:cxfGlobalWeather?synchronous=true") //Use synchronous to use the same thread to make the http call
-				.setBody(method(RestEndpoints.class,"convertNodeListToList"))
-				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
-				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
-				.setProperty("cityNames",body())
-
-				//We'd like to get more information (zip code) for the database for each city,
-				//but also give back partial response in case of errors, and show the error message next to the city
-				//Create an empty list, it will be populated from inside the splitter
-				.setProperty("cities",method(RestEndpoints.class,"emptyCityList"))
-				
-
-				//Splitter gives back the original Exchange if no aggregationStrategy is set (multicast gives back the last Exchange!),
-				//an exception inside the splitter is only propagated if it's not handled(true)
-				//stopOnException is false by default, so we don't have to use the ContinueOnExceptionStrategy
-				.split(exchangeProperty("cityNames")).parallelProcessing().executorServiceRef("myThreadPool")
-					.setProperty("city",method(RestEndpoints.class, "newCity"))
-					.to("direct:getCityInfo")
-				.end()
-				//At this point the City objects in the list should be populated with the zip codes or errors
-				
-				//Response object
-				.setBody(method(RestEndpoints.class,"createResponse"))
-				.removeHeaders("*", HEADER_BUSINESSID)
-			.endRest()
+			.to("direct:getCitiesWithZip") //Implementation is in a direct route
 		.post("/").type(CountryApiPojo.class)
 			//swagger
 			.description("Send country")
@@ -160,6 +110,50 @@ public class RestEndpoints extends RouteBuilder {
 				.setBody(constant(null))//Don't return anything in the body, so no responseModel() or outType() is required
 			.endRest()
 		;
+
+		//Get city list for country (from a webservice) and zip codes for each city (calling a stored procedure)
+		from("direct:getCitiesWithZip").routeId("get-cities-with-zip")
+				.onException(ValidationException.class)
+					.handled(true)
+					.removeHeaders("*",HEADER_BUSINESSID)
+					.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(404))
+					.bean("restbuilder","errorResponse(4000,'Not found')")
+					.end()
+
+				.log("Getting cities for ${header.country}")
+
+				//Save input headers/values needed later as ExchangeProperty
+				.setProperty("country",header("country"))
+
+				//Get cities for a country
+				//Call SOAP servce with CXF
+				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (insted of GetCitiesByCountryRequest
+				.removeHeaders("*", HEADER_BUSINESSID)
+				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
+				.to("cxf:bean:cxfGlobalWeather?synchronous=true") //Use synchronous to use the same thread to make the http call
+				.setBody(method(RestEndpoints.class,"getCityNamesFromXML"))
+				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
+				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
+				.setProperty("cityNames",body())
+
+				//Get zip codes from the database for each city,
+				//Also give back partial response in case of errors, and show the error message next to the city
+				//First create an empty list, it will be populated from inside the splitter
+				.setProperty("cities",method(RestEndpoints.class,"emptyCityList"))
+
+				//Splitter gives back the original Exchange if no aggregationStrategy is set (multicast gives back the last Exchange),
+				//an exception inside the splitter is only propagated if it's not handled(true)
+				//stopOnException is false by default, so we don't have to use the ContinueOnExceptionStrategy
+				.split(exchangeProperty("cityNames")).parallelProcessing().executorServiceRef("myThreadPool")
+					.setProperty("city",method(RestEndpoints.class, "newCity"))
+					.to("direct:getCityZips")
+				.end()
+				//At this point the City objects in the list should be populated with the zip codes or errors
+
+				//Response object
+				.setBody(method(RestEndpoints.class,"createResponse"))
+				.removeHeaders("*", HEADER_BUSINESSID);
+
 		/************************
 		/* Secured route with basic authentication
 		 ************************/
@@ -211,16 +205,16 @@ public class RestEndpoints extends RouteBuilder {
 		return new ApiResponse(code, message);
 	}
 
-	//Convert xml path NodeList to List
-	public static List<String> convertNodeListToList(@XPath("//NewDataSet/Table/City/text()") NodeList nodeList) {
-		return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).map(n->n.getNodeValue()).collect(Collectors.toList());
-	}
-
 	//Create an empty synchronized List<City>
 	public static List<City> emptyCityList(){
 		return Collections.synchronizedList(new ArrayList<City>());
 	}
-	
+
+	//Convert xml path NodeList to List
+	public static List<String> getCityNamesFromXML(@XPath("//NewDataSet/Table/City/text()") NodeList nodeList) {
+		return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).map(n->n.getNodeValue()).collect(Collectors.toList());
+	}
+
 	//Create a new City object and add it to response list
 	public static City newCity(@Body String cityName, @ExchangeProperty("cities") List<City> cities) {
 		City city = new City(cityName);
