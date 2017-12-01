@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
@@ -108,8 +109,9 @@ public class SoapCallWithObjectTest extends Assert {
 	public void emptyCitiesResponse() throws Exception {
 		ResponseEntity<ApiResponse> apiResponse = testRestTemplate.getForEntity("/api/country/EMPTY/cities",ApiResponse.class);
 
-		assertEquals(500, apiResponse.getStatusCodeValue());
-		assertEquals(5000, apiResponse.getBody().getCode());
+		assertEquals(404, apiResponse.getStatusCodeValue());
+		assertEquals(4000, apiResponse.getBody().getCode());
+		assertEquals("Not found", apiResponse.getBody().getMessage());
 
 	}
 

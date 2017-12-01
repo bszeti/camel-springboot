@@ -36,4 +36,30 @@ public class ApiResponse {
 		this.message = message;
 	}
 
+	//generated
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ApiResponse that = (ApiResponse) o;
+
+		if (code != that.code) return false;
+		return message != null ? message.equals(that.message) : that.message == null;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = code;
+		result = 31 * result + (message != null ? message.hashCode() : 0);
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "ApiResponse{" +
+				"code=" + code +
+				", message='" + message + '\'' +
+				'}';
+	}
 }

@@ -15,7 +15,7 @@ public class StoredProcEmbedded {
                                String[] message,
                                //A stored procedure can return multiple result sets
                                ResultSet[] resultSets) throws SQLException {
-        log.info("GETZIPS is called");
+        log.debug("GETZIPS is called. city={}",city);
 
         //Out variables
         status[0] = 0;

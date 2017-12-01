@@ -9,10 +9,7 @@ import java.util.stream.IntStream;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.camel.Body;
-import org.apache.camel.Exchange;
-import org.apache.camel.ExchangeException;
-import org.apache.camel.ExchangeProperty;
+import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.bean.validator.BeanValidationException;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
@@ -39,6 +36,7 @@ public class RestEndpoints extends RouteBuilder {
 	
 	private final static UserApiPojo DUMMY_USER = new UserApiPojo("JohnDoe", 21);
 	private final static ApiResponse SUCC = new ApiResponse(0,"OK");
+	private final static ApiResponse NOT_FOUND = new ApiResponse(4000,"Not Found");
 	
 	public final static String HEADER_BUSINESSID = "businessId";
 		
@@ -111,6 +109,13 @@ public class RestEndpoints extends RouteBuilder {
 			.responseMessage().code(200).responseModel(CitiesResponse.class).endResponseMessage() //OK
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
 			.route().routeId("country-get-cities")
+				.onException(ValidationException.class)
+					.handled(true)
+					.removeHeaders("*",HEADER_BUSINESSID)
+					.setHeader(Exchange.HTTP_RESPONSE_CODE, constant(404))
+					.bean("restbuilder","errorResponse(4000,'Not found')")
+					.end()
+
 				.log("Getting cities for ${header.country}")
 				
 				//Save input headers/values needed later as ExchangeProperty

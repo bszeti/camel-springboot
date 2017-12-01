@@ -17,8 +17,8 @@ public class CountryApiPojo {
 	public void setCountry(String country) {
 		this.country = country;
 	}
-	
-	//hasCode, equals
+
+	//generated
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -49,8 +49,12 @@ public class CountryApiPojo {
 			return false;
 		return true;
 	}
-	
-	//hasCode, equals
-	
-	
+
+	@Override
+	public String toString() {
+		return "CountryApiPojo{" +
+				"iso='" + iso + '\'' +
+				", country='" + country + '\'' +
+				'}';
+	}
 }

@@ -38,8 +38,11 @@ import org.springframework.test.context.ActiveProfiles;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.Matchers.*;
 
 @RunWith(CamelSpringBootRunner.class)
 @ActiveProfiles("test") //The properties are merged from application.properties and application-test.properties
@@ -110,10 +113,10 @@ public class StoredProcTest extends Assert {
 		log.info("Expected cities: {}",objectMapper.writeValueAsString(expectedCities));
 		log.info("Response cities: {}",objectMapper.writeValueAsString(citiesResponse.getCities()));
 
-		assertEquals(objectMapper.writeValueAsString(expectedCities),objectMapper.writeValueAsString(citiesResponse.getCities()));
+		assertEquals(expectedCities, citiesResponse.getCities());
 	}
 
-//	@Test
+	@Test
 	public void multipleCities() throws Exception {
 		mockGlobalWeatherResponseBody = "<NewDataSet><Table><Country>TEST</Country><City>AA</City></Table><Table><Country>TEST</Country><City>BB</City></Table></NewDataSet>";
 
@@ -128,12 +131,26 @@ public class StoredProcTest extends Assert {
 				new City("AA", Arrays.asList("ZIP-AA")),
 				new City("BB", Arrays.asList("ZIP-BB1","ZIP-BB2"))
 		);
-		assertEquals(objectMapper.writeValueAsString(expectedCities),objectMapper.writeValueAsString(citiesResponse.getCities()));
+		//Sort response list by city name
+		citiesResponse.getCities().sort(Comparator.comparing(City::getName));
+		assertEquals(expectedCities, citiesResponse.getCities());
 	}
 
-//	@Test
-	public void zeroCities() throws Exception {
-		mockGlobalWeatherResponseBody = "<NewDataSet></NewDataSet>";
+	@Test
+	public void noZipCity() throws Exception {
+		mockGlobalWeatherResponseBody = "<NewDataSet><Table><Country>TEST</Country><City>XX</City></Table></NewDataSet>";
+
+        Exchange response =  fluentProducerTemplate.send();
+        String responseBody = response.getIn().getBody(String.class);
+        CitiesResponse citiesResponse = objectMapper.readValue(responseBody,CitiesResponse.class);
+
+        assertEquals(200, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
+        assertEquals("TEST", citiesResponse.getCountry());
+
+        List<City> expectedCities = Arrays.asList(
+                new City("XX", Arrays.asList())
+        );
+        assertEquals(expectedCities, citiesResponse.getCities());
 	}
 
 }

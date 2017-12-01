@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.camel.Body;
-import org.apache.camel.ExchangeException;
-import org.apache.camel.ExchangeProperty;
-import org.apache.camel.LoggingLevel;
+import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.language.Simple;
 import org.slf4j.Logger;
