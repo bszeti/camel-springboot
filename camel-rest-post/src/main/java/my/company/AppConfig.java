@@ -34,7 +34,6 @@ public class AppConfig {
 				jacksonObjectMapperBuilder
 						.mixIn(BasicDataSource.class, BasicDataSourceMixIn.class)
 						.indentOutput(true);
-
 			}
 		};
 	}

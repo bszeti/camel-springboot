@@ -2,6 +2,7 @@ package my.company.route;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import my.company.model.*;
+import my.company.utils.RouteHelper;
 import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.bean.validator.BeanValidationException;
@@ -30,7 +31,7 @@ public class RestEndpoints extends RouteBuilder {
 	private final static ApiResponse SUCC = new ApiResponse(0,"OK");
 	private final static ApiResponse NOT_FOUND = new ApiResponse(4000,"Not Found");
 	
-	public final static String HEADER_BUSINESSID = "businessId";
+	public final static String HEADER_BUSINESSID = "businessId"; //Optional custom correlation id received/sent from/to external systems
 		
 	@Override
 	public void configure() throws Exception {
@@ -70,6 +71,7 @@ public class RestEndpoints extends RouteBuilder {
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
 			//route
 			.route().routeId("user-get")
+				.bean("routeHelper","logHeadersByPattern")
 				.log("Get user: ${header.id}")
 				.setBody().simple("${headers}",HeaderValidationsPojo.class)
 				.to("bean-validator:validateHeaders") //or .validate().simple("${header.id} < 100")
@@ -85,6 +87,7 @@ public class RestEndpoints extends RouteBuilder {
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
 			//route 
 			.route().routeId("post-user")
+				.bean("routeHelper","logHeadersByPattern")
 				.log("User received: ${body}").id("received-user") //This step gets an id, so we can refer it in test
 				.setBody(constant(SUCC))
 				.removeHeaders("*",HEADER_BUSINESSID)
@@ -126,12 +129,12 @@ public class RestEndpoints extends RouteBuilder {
 				.setProperty("country",header("country"))
 
 				//Get cities for a country
-				//Call SOAP servce with CXF
-				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (insted of GetCitiesByCountryRequest
+				//Call SOAP service with CXF to get list of city names
+				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (instead of something like GetCitiesByCountryRequest)
 				.removeHeaders("*", HEADER_BUSINESSID)
 				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
 				.to("cxf:bean:cxfGlobalWeather?synchronous=true") //Use synchronous to use the same thread to make the http call
-				.setBody(method(RestEndpoints.class,"getCityNamesFromXML"))
+				.setBody(method(this,"getCityNamesFromXML"))
 				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
 				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
 				.setProperty("cityNames",body())
@@ -139,19 +142,18 @@ public class RestEndpoints extends RouteBuilder {
 				//Get zip codes from the database for each city,
 				//Also give back partial response in case of errors, and show the error message next to the city
 				//First create an empty list, it will be populated from inside the splitter
-				.setProperty("cities",method(RestEndpoints.class,"emptyCityList"))
-
+				.setProperty("cities",method(this,"emptyCityList"))
 				//Splitter gives back the original Exchange if no aggregationStrategy is set (multicast gives back the last Exchange),
 				//an exception inside the splitter is only propagated if it's not handled(true)
 				//stopOnException is false by default, so we don't have to use the ContinueOnExceptionStrategy
 				.split(exchangeProperty("cityNames")).parallelProcessing().executorServiceRef("myThreadPool")
-					.setProperty("city",method(RestEndpoints.class, "newCity"))
+					.setProperty("city",method(this, "newCity"))
 					.to("direct:getCityZips")
 				.end()
 				//At this point the City objects in the list should be populated with the zip codes or errors
 
 				//Response object
-				.setBody(method(RestEndpoints.class,"createResponse"))
+				.setBody(method(this,"createResponse"))
 				.removeHeaders("*", HEADER_BUSINESSID);
 
 		/************************
