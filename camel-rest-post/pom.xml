@@ -97,7 +97,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.camel</groupId>
-      <artifactId>camel-ehcache</artifactId>
+      <artifactId>camel-ehcache</artifactId> <!-- TODO: Use camel-ehcache-starter -->
     </dependency>
 
     <!-- Swagger -->

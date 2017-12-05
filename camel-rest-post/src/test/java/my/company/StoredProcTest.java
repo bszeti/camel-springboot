@@ -43,10 +43,11 @@ import java.util.List;
 public class StoredProcTest extends Assert {
 	private static final Logger log = LoggerFactory.getLogger(StoredProcTest.class);
 
+	//Create (new) FluentProducerTemplate instances
 	@Produce(uri = "undertow:http://localhost:{{local.server.port}}/api/country/TEST/cities")
 	FluentProducerTemplate fluentProducerTemplate;
 
-    @Produce(uri = "ehcache://cityNamesCache?configUri=classpath:ehcache.xml")
+    @Produce(uri = "ehcache://cityNamesCache?configUri=classpath:ehcache.xml&keyType=java.lang.String&valueType=java.util.List")
     FluentProducerTemplate cacheProducer;
 
 	@EndpointInject(uri="mock:cxf:bean:cxfGlobalWeather") //Mock cxf endpoint, no SOAP call is done
@@ -75,7 +76,6 @@ public class StoredProcTest extends Assert {
 	@Before
 	public void before(){
 		//Prepare common fluentProducerTemplate config
-		log.info("fluentProducerTemplate: {}", fluentProducerTemplate); //TODO: Is this a new instance for every method or a singleton from the context?
 		fluentProducerTemplate
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.GET)
 				.withHeader(Exchange.CONTENT_TYPE, MediaType.APPLICATION_JSON)
