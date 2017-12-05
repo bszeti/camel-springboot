@@ -2,13 +2,11 @@ package my.company.route;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import my.company.model.*;
-import my.company.utils.RouteHelper;
 import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.bean.validator.BeanValidationException;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
-import org.apache.camel.language.Bean;
-import org.apache.camel.language.Simple;
+import org.apache.camel.component.ehcache.EhcacheConstants;
 import org.apache.camel.language.XPath;
 import org.apache.camel.model.rest.RestParamType;
 import org.apache.cxf.binding.soap.SoapFault;
@@ -20,9 +18,14 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.NodeList;
 
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.apache.camel.builder.PredicateBuilder.not;
 
 @Component("restbuilder")
 public class RestEndpoints extends RouteBuilder {
@@ -137,14 +140,27 @@ public class RestEndpoints extends RouteBuilder {
 				.setProperty("country",header("country"))
 
 				//Get cities for a country
-				//Call SOAP service with CXF to get list of city names
-				.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (instead of something like GetCitiesByCountryRequest)
-				.removeHeaders("*", HEADER_BUSINESSID)
-				.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
-				.to("cxf:bean:cxfGlobalWeather?synchronous=true") //Use synchronous to use the same thread to make the http call
-				.setBody(method(this,"getCityNamesFromXML"))
-				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list
-				.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
+
+				//Try to get country from cache first
+				.setHeader(EhcacheConstants.ACTION, constant(EhcacheConstants.ACTION_GET))
+				.setHeader(EhcacheConstants.KEY, exchangeProperty("country"))
+				.to("ehcache://cityNamesCache?configUri=classpath:ehcache.xml")
+				.to("log:cache-get-cities?showAll=true&multiline=true")
+				.choice()
+				.when(not(header(EhcacheConstants.ACTION_HAS_RESULT)))
+					//Call SOAP service with CXF to get list of city names
+					.removeHeaders("*", HEADER_BUSINESSID)
+					.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (instead of something like GetCitiesByCountryRequest)
+					.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
+					.to("cxf:bean:cxfGlobalWeather?synchronous=true") //Use synchronous to use the same thread to make the http call
+					.setBody(method(this,"getCityNamesFromXML"))
+					.to("log:country-get-cities?showAll=true&multiline=true&level=DEBUG")
+					//Add to cache
+					.setHeader(EhcacheConstants.ACTION, constant(EhcacheConstants.ACTION_PUT))
+					.setHeader(EhcacheConstants.KEY, exchangeProperty("country"))
+					.to("ehcache://cityNamesCache?configUri=classpath:ehcache.xml")
+				.end()
+				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list //TODO: Validate doesn't work in choice??
 				.setProperty("cityNames",body())
 
 				//Get zip codes from the database for each city,

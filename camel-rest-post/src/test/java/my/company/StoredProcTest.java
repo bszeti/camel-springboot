@@ -7,6 +7,7 @@ import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
 import org.apache.camel.FluentProducerTemplate;
 import org.apache.camel.Produce;
+import org.apache.camel.component.ehcache.EhcacheConstants;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.apache.camel.test.spring.MockEndpointsAndSkip;
@@ -27,6 +28,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
@@ -43,6 +45,9 @@ public class StoredProcTest extends Assert {
 
 	@Produce(uri = "undertow:http://localhost:{{local.server.port}}/api/country/TEST/cities")
 	FluentProducerTemplate fluentProducerTemplate;
+
+    @Produce(uri = "ehcache://cityNamesCache?configUri=classpath:ehcache.xml")
+    FluentProducerTemplate cacheProducer;
 
 	@EndpointInject(uri="mock:cxf:bean:cxfGlobalWeather") //Mock cxf endpoint, no SOAP call is done
 	MockEndpoint mockGlobalWeather;
@@ -83,6 +88,9 @@ public class StoredProcTest extends Assert {
 					e.getIn().setBody(mockGlobalWeatherResponseBody);
 				}
 		);
+
+		//Clear cache as the cache is common for all tests
+        cacheProducer.withHeader(EhcacheConstants.ACTION,EhcacheConstants.ACTION_CLEAR).send();
 	}
 
 	@Test
