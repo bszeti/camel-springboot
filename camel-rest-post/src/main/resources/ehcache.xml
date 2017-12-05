@@ -4,6 +4,8 @@
          >
 
     <cache alias="cityNamesCache">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.util.List</value-type>
         <expiry>
             <ttl unit="seconds">5</ttl>
         </expiry>

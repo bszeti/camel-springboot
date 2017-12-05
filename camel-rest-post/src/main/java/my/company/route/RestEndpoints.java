@@ -144,11 +144,11 @@ public class RestEndpoints extends RouteBuilder {
 				//Try to get country from cache first
 				.setHeader(EhcacheConstants.ACTION, constant(EhcacheConstants.ACTION_GET))
 				.setHeader(EhcacheConstants.KEY, exchangeProperty("country"))
-				.to("ehcache://cityNamesCache?configUri=classpath:ehcache.xml")
-				.to("log:cache-get-cities?showAll=true&multiline=true")
+				.to("ehcache://cityNamesCache?configUri=classpath:ehcache.xml&keyType=java.lang.String&valueType=java.util.List")
 				.choice()
 				.when(not(header(EhcacheConstants.ACTION_HAS_RESULT)))
 					//Call SOAP service with CXF to get list of city names
+					.log(LoggingLevel.DEBUG,"Calling SOAP service")
 					.removeHeaders("*", HEADER_BUSINESSID)
 					.setBody(exchangeProperty("country")) //This is a very simple service where the request object is a String (instead of something like GetCitiesByCountryRequest)
 					.setHeader(CxfConstants.OPERATION_NAME,constant("GetCitiesByCountry"))
@@ -158,7 +158,7 @@ public class RestEndpoints extends RouteBuilder {
 					//Add to cache
 					.setHeader(EhcacheConstants.ACTION, constant(EhcacheConstants.ACTION_PUT))
 					.setHeader(EhcacheConstants.KEY, exchangeProperty("country"))
-					.to("ehcache://cityNamesCache?configUri=classpath:ehcache.xml")
+					.to("ehcache://cityNamesCache?configUri=classpath:ehcache.xml&keyType=java.lang.String&valueType=java.util.List")
 				.end()
 				.validate(body().isNotEqualTo(new ArrayList<String>())) //Verify that the the result is not an empty list //TODO: Validate doesn't work in choice??
 				.setProperty("cityNames",body())
