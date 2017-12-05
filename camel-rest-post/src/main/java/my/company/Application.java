@@ -28,7 +28,12 @@ import java.util.Properties;
 
 @SpringBootApplication
 // load regular Spring XML file from the classpath
-@ImportResource({"classpath:spring/*.xml"})
+// Be careful with using "classpath:" or classpath*:" and fixed name or ant-style pattern. See PathMatchingResourcePatternResolver for details
+// classpath:my.file returns the first file from classpath
+// classpath*:my.file finds files from all classpath roots (/classes, /test-classes and jars)
+// classpath:**/my*.file returns multiple files under the first classpath root (/classes OR /test-classes)
+// classpath*:**/my*file returns matching files from all classpath roots
+@ImportResource({"classpath:spring/application-context.xml","classpath*:spring/user-list*.xml"}) //
 public class Application {
 	private final static Logger log = LoggerFactory.getLogger(Application.class);
 

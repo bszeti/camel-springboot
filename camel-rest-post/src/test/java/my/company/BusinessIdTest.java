@@ -20,11 +20,12 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @DirtiesContext
-@MockEndpointsAndSkip("direct:getCityInfo") //pattern supports wildcard "direct:get*" or regexp "direct:.*|cxf:.*"
 public class BusinessIdTest extends Assert {
 	private static final Logger log = LoggerFactory.getLogger(BusinessIdTest.class);
 

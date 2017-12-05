@@ -22,6 +22,7 @@
 
 	<!-- Beans -->
 	<bean id="succResponse" class="my.company.model.ApiResponse">
+		<property name="code" value="0" />
 		<property name="message" value="OK" />
 	</bean>
 	

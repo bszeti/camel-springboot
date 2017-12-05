@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<!-- Users -->
+	<bean id="user1" class="my.company.model.UserApiPojo">
+		<property name="name" value="Alice" />
+		<property name="age" value="20" />
+	</bean>
+	<bean id="user2" class="my.company.model.UserApiPojo">
+		<property name="name" value="Bob" />
+		<property name="age" value="21" />
+	</bean>
+	<bean id="user3" class="my.company.model.UserApiPojo">
+		<property name="name" value="Bob" />
+		<property name="age" value="22" />
+	</bean>
+	<bean id="user4" class="my.company.model.UserApiPojo">
+		<property name="name" value="Xavier" />
+		<property name="age" value="23" />
+	</bean>
+	<bean id="user5" class="my.company.model.UserApiPojo">
+		<property name="name" value="Yvette" />
+		<property name="age" value="24" />
+	</bean>
+	<bean id="user6" class="my.company.model.UserApiPojo">
+		<property name="name" value="Zion" />
+		<property name="age" value="25" />
+	</bean>
+	<!-- Roles -->
+	<!-- This is an example how to define beans for different profiles in one file. It's cleaner to do this in separate files -->
+	<beans profile="default,ssl">
+		<util:map id="roles" key-type="java.lang.String" value-type="java.util.List">
+			<entry key="dreamer" value="#{{@user1,@user2,@user3}}"/>
+			<entry key="agent" value="#{{@user4}}"/>
+		</util:map>
+	</beans>
+	<beans profile="maintenance">
+		<util:map id="roles" key-type="java.lang.String" value-type="java.util.List">
+			<entry key="dreamer" value="#{{}}"/>
+			<entry key="agent" value="#{{@user5}}"/>
+		</util:map>
+	</beans>
+
+</beans>

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@MockEndpointsAndSkip("direct:getCityInfo")
+@MockEndpointsAndSkip("direct:getCityZips")
 public class SoapCallWithFileTest extends Assert {
 	
 	@Autowired

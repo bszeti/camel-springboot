@@ -7,19 +7,20 @@ import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.bean.validator.BeanValidationException;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
+import org.apache.camel.language.Bean;
+import org.apache.camel.language.Simple;
 import org.apache.camel.language.XPath;
 import org.apache.camel.model.rest.RestParamType;
 import org.apache.cxf.binding.soap.SoapFault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.NodeList;
 
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,11 +28,13 @@ import java.util.stream.IntStream;
 public class RestEndpoints extends RouteBuilder {
 	private final static Logger log = LoggerFactory.getLogger(RestEndpoints.class);
 	
-	private final static UserApiPojo DUMMY_USER = new UserApiPojo("JohnDoe", 21);
-	private final static ApiResponse SUCC = new ApiResponse(0,"OK");
-	private final static ApiResponse NOT_FOUND = new ApiResponse(4000,"Not Found");
-	
+	private final static UserApiPojo DUMMY_USER = new UserApiPojo("JohnDoe", 100);
+
 	public final static String HEADER_BUSINESSID = "businessId"; //Optional custom correlation id received/sent from/to external systems
+
+	@Autowired
+	@Qualifier("succResponse")
+	private ApiResponse SUCC;
 		
 	@Override
 	public void configure() throws Exception {
@@ -75,10 +78,15 @@ public class RestEndpoints extends RouteBuilder {
 				.log("Get user: ${header.id}")
 				.setBody().simple("${headers}",HeaderValidationsPojo.class)
 				.to("bean-validator:validateHeaders") //or .validate().simple("${header.id} < 100")
-				.setBody(constant(DUMMY_USER))
+				//Lookup user from beans with name "user[id]"
+				.setBody(simple("${ref:user${headers.id}}"))
+				.choice()
+				.when(body().isNull()) // Return dummy user if missing
+					.setBody(constant(DUMMY_USER))
+				.end()
 				.removeHeaders("*","businessId")
 			.endRest()
-		.post("/").type(UserApiPojo.class)
+		.post("/").type(UserApiPojo.class) //The post endpoint doesn't store the user, it only sends back an a succesful response
 			//swagger
 			.description("Send user")
 			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transaction id. Defaults to a random uuid").dataType("string").endParam()
@@ -157,14 +165,16 @@ public class RestEndpoints extends RouteBuilder {
 				.removeHeaders("*", HEADER_BUSINESSID);
 
 		/************************
-		/* Secured route with basic authentication
+		/* Secured route with basic authentication. User list per role (coming from spring xml)
 		 ************************/
 		rest("/secure").description("Basic auth. Try name:'user' passwd:'secret'.")
-		.get().outType(ApiResponse.class)
+		.get("/role/{roleName}").description("User list by role")
+				.param().name("roleName").type(RestParamType.path).allowableValues("dreamer","agent").dataType("string").endParam()
+				.responseMessage().code(200).endResponseMessage()
 			.route().routeId("secure-get")
-			.log("Secure is called")
-			.setBody(constant(SUCC))
-			.removeHeaders("*",HEADER_BUSINESSID)
+				.log("Secure is called")
+				.setBody(method("roles","get(${header.roleName})"))
+				.removeHeaders("*",HEADER_BUSINESSID)
 		.endRest();
 		
 	}
@@ -172,7 +182,7 @@ public class RestEndpoints extends RouteBuilder {
 	//Helper methods used in these routes. It's a good idea to keep them in the RouteBuilder for readability if they are simple.
 
 	//Build succesful response pojo
-	public static CitiesResponse createResponse(@ExchangeProperty("country") String country, @ExchangeProperty("cities") List<City> cities) {
+	public CitiesResponse createResponse(@ExchangeProperty("country") String country, @ExchangeProperty("cities") List<City> cities) {
 		CitiesResponse citiesResponse = new CitiesResponse();
 		citiesResponse.setCode(SUCC.getCode());
 		citiesResponse.setMessage(SUCC.getMessage());

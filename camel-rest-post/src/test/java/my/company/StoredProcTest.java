@@ -37,7 +37,7 @@ import java.util.List;
 @ActiveProfiles("test") //The properties are merged from application.properties and application-test.properties
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-@MockEndpointsAndSkip("cxf:bean:.*")
+@MockEndpointsAndSkip("cxf:bean:.*") //pattern supports wildcard "direct:get*" or regexp "direct:.*|cxf:.*"
 public class StoredProcTest extends Assert {
 	private static final Logger log = LoggerFactory.getLogger(StoredProcTest.class);
 

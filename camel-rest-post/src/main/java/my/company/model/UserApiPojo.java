@@ -5,11 +5,12 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 public class UserApiPojo {
 	private String name;
 	private Integer age;
-	
+
 	@ApiModelProperty(readOnly=true)
 	private Date createdDate = new Date();
 	
@@ -39,7 +40,7 @@ public class UserApiPojo {
 	public void setAge(Integer age) {
 		this.age = age;
 	}
-	
+
 	public Date getCreatedDate() {
 		return createdDate;
 	}
