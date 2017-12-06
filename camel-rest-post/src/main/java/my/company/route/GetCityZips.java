@@ -17,19 +17,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * The
+ */
 @Component
-public class GetCityInfo extends RouteBuilder {
-	private static final Logger log = LoggerFactory.getLogger(GetCityInfo.class);
+public class GetCityZips extends RouteBuilder {
+	private static final Logger log = LoggerFactory.getLogger(GetCityZips.class);
 
-	//The sql-stored template uses useMessageBodyForTemplate=true so we can add the schema to the template if it's configured
-	//If no schema is required then using a resource file as sql-stored:classpath:sql/myprocedure.sql looks better
+	//Stored procedure sql call template using header
+	//The sql-stored endpoint has useMessageBodyForTemplate=true so we can add the schema to the template if it's configured
+	//If no schema is required then using a template file as sql-stored:classpath:sql/myprocedure.sql also works
+	//The template only supports ${header.foo} not all simple language expressions
 	public static String SP_GETZIPS = "GETZIPS(\n" + 
 			"  CHAR ${header.cityName},\n" + 
 			"  OUT INTEGER STATUS,\n" + 
 			"  OUT CHAR MESSAGE\n" + 
 			")";
 	
-	@Value("${cityInfoDatabase.schema:#{null}}")
+	@Value("${cityInfoDatabase.schema:#{null}}") //default value is null. It's required is SpEL otherwise the missing property causes an exception
 	String schema;
 
 	@Override
@@ -38,13 +43,13 @@ public class GetCityInfo extends RouteBuilder {
 		onException(Exception.class)
 			.handled(true)
 			.log(LoggingLevel.ERROR, "Error getting city info. ${exception.message}")
-			.to("log:getCityInfo.error?showAll=true&multiline=true&level=ERROR")
-			.bean(GetCityInfo.class, "addErrorToCity");
+			.bean(GetCityZips.class, "addErrorToCity");
 		
-		//An City object is expected as exchangeProperty.city having the name already.
+		//A City object is expected as exchangeProperty.city having the name set already.
 		//This object will be enriched by the route. This is easier than writing an AggregatorStrategy
 		from("direct:getCityZips").routeId("getCityZips")
-			//prepare and call stored proceedure
+
+			//prepare and call stored procedure
 			.removeHeaders("*", RestEndpoints.HEADER_BUSINESSID)
 			.setHeader("cityName", simple("${exchangeProperty.city?.name}"))
 			.setBody((constant(schema == null ? SP_GETZIPS : schema+"."+SP_GETZIPS)))
@@ -54,17 +59,18 @@ public class GetCityInfo extends RouteBuilder {
 			.choice()
 				.when(simple("${body[STATUS]} == '0'"))
 					.setBody(simple("${body[#result-set-1]}")) //A stored procedure may also return multiple resultsets
-					.bean(GetCityInfo.class, "processResultset")
+					.bean(GetCityZips.class, "processResultset")
 				.otherwise()
 					.log(LoggingLevel.WARN, "Failed to get zips for ${header.cityName}")
-					.bean(GetCityInfo.class, "throwStatusError")
+					.bean(GetCityZips.class, "throwStatusError")
+			.end()
 			;
 		
 	}
 	
 	//Route helper methods
 	
-	//Get values from ZIPCODE column and store in City object
+	//Get values from ZIP column and store in City object
 	public static void processResultset(
 			@Body List<Map<String,Object>> resultset, 
 			@ExchangeProperty("city") City city) {
@@ -73,7 +79,8 @@ public class GetCityInfo extends RouteBuilder {
 				.collect(Collectors.toList());
 		city.setZips(zips);
 	}
-	
+
+	//Throw an exception id status is not 0
 	public static void throwStatusError(
 			@Simple("${body[STATUS]}") String status,
 			@Simple("${body[MESSAGE]}") String message

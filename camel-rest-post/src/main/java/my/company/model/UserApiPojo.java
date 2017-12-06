@@ -5,8 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
+//Pojo for incoming object
 public class UserApiPojo {
 	private String name;
 	private Integer age;

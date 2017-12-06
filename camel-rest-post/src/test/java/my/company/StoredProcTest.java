@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import static my.company.utils.StoredProcEmbedded.STATUS_ERROR;
+
 @RunWith(CamelSpringBootRunner.class)
 @ActiveProfiles("test") //The properties are merged from application.properties and application-test.properties
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -149,5 +151,18 @@ public class StoredProcTest extends Assert {
         );
         assertEquals(expectedCities, citiesResponse.getCities());
 	}
+
+	@Test
+    public void statusError() throws Exception {
+        mockGlobalWeatherResponseBody = "<NewDataSet><Table><Country>TEST</Country><City>"+STATUS_ERROR+"</City></Table></NewDataSet>";
+
+        Exchange response =  fluentProducerTemplate.send();
+        String responseBody = response.getIn().getBody(String.class);
+        CitiesResponse citiesResponse = objectMapper.readValue(responseBody,CitiesResponse.class);
+
+        assertEquals(200, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
+        assertEquals("TEST", citiesResponse.getCountry());
+        assertEquals("Status 1 - Unexpected city", citiesResponse.getCities().get(0).getError());
+    }
 
 }

@@ -1,5 +1,6 @@
 package my.company.model;
 
+//Pojo for incoming object
 public class CountryApiPojo {
 	private String iso;
 	private String country;

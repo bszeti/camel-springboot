@@ -3,6 +3,7 @@ package my.company.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 
+//Base response pojo with a status code and message
 public class ApiResponse {
 	@ApiModelProperty(value="Response code. 0 for success.", example="4000")
 	@JsonProperty

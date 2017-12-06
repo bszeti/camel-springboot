@@ -8,6 +8,7 @@ import java.text.MessageFormat;
 
 public class StoredProcEmbedded {
     private static final Logger log = LoggerFactory.getLogger(StoredProcEmbedded.class);
+    public static final String STATUS_ERROR = "STATUS_ERROR";
 
     public static void GETZIPS(String city,
                                //OUT - array is used as a "reference pointer", but only item[0] is expected
@@ -17,7 +18,14 @@ public class StoredProcEmbedded {
                                ResultSet[] resultSets) throws SQLException {
         log.debug("GETZIPS is called. city={}",city);
 
-        //Out variables
+        //To test status error handling
+        if (STATUS_ERROR.equals(city)) {
+            status[0] = 1;
+            message[0] = "Unexpected city";
+            return;
+        }
+
+        //Regular respose from table
         status[0] = 0;
         message[0] = "OK";
 

@@ -3,6 +3,7 @@
 	<!-- Define additional camel rest endpoints classpath:camel-rest/*.xml is 
 		automatically scanned -->
 
+	<!-- Example how a rest endpoint is defined in XML -->
 	<rest path="/hello">
 		<get uri="/world">
 			<param name="businessId" type="header" required="false"/>

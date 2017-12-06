@@ -1,10 +1,22 @@
 package my.company.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.List;
 
+//Response pojo city name and it's zip codes. Contains a optional "error" field for error message by querying zips
 public class City {
+	@ApiModelProperty(value="City name", example="Paris")
+	@JsonProperty
 	private String name;
+
+	@ApiModelProperty(value="List of related zip codes")
+	@JsonProperty
 	private List<String> zips;
+
+	@ApiModelProperty(value="Error by querying zip codes", example="Connection error...")
+	@JsonProperty
 	private String error;
 
 	public City() {

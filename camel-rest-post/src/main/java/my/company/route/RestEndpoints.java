@@ -63,7 +63,9 @@ public class RestEndpoints extends RouteBuilder {
 		 ************************/
 
 		/************************
-		 * Simple api with post and get
+		 * Simple api with post and get: /user
+		 * GET returns users defined in user-list.xml. E.g.: /user/2
+		 * POST receives a user pojo (not stored)
 		 ************************/
 		rest("/user").description("User API")
 			.produces(MediaType.APPLICATION_JSON).consumes(MediaType.APPLICATION_JSON)
@@ -78,9 +80,11 @@ public class RestEndpoints extends RouteBuilder {
 			//route
 			.route().routeId("user-get")
 				.bean("routeHelper","logHeadersByPattern")
-				.log("Get user: ${header.id}")
+
+				//Validate headers
 				.setBody().simple("${headers}",HeaderValidationsPojo.class)
 				.to("bean-validator:validateHeaders") //or .validate().simple("${header.id} < 100")
+
 				//Lookup user from beans with name "user[id]"
 				.setBody(simple("${ref:user${headers.id}}"))
 				.choice()
@@ -105,8 +109,9 @@ public class RestEndpoints extends RouteBuilder {
 			.endRest();
 
 		/************************
-		 * A complex get endpoint calling a SOAP service and stored procedure to build response
-		 * The post endpoint here only demonstrates that a different unmarshalling type can be set than in the previous post endpoint
+		 * Another rest endpoint: /country
+		 * GET - A complex endpoint calling a SOAP service and stored procedure to build response
+		 * POST is here only to demonstrates that a different unmarshalling type can be set than in the previous post endpoint
 		 ************************/
 		rest("/country").description("Country API")
 			.skipBindingOnErrorCode(false)
@@ -118,15 +123,17 @@ public class RestEndpoints extends RouteBuilder {
 		.post("/").type(CountryApiPojo.class)
 			//swagger
 			.description("Send country")
-			.responseMessage().code(200).endResponseMessage()
+			.responseMessage().code(200).responseModel(ApiResponse.class).endResponseMessage()
 			.route().routeId("post-country")
 				.log("Country received: ${body}").id("received-country") //This step gets an id, so we can refer it in test
-				.setBody(constant(null))//Don't return anything in the body, so no responseModel() or outType() is required
+				.setBody(constant(SUCC))
+				.removeHeaders("*",HEADER_BUSINESSID)
 			.endRest()
 		;
 
 		//Get city list for country (from a webservice) and zip codes for each city (calling a stored procedure)
 		from("direct:getCitiesWithZip").routeId("get-cities-with-zip")
+				//An extra onException handler only for this route
 				.onException(ValidationException.class)
 					.handled(true)
 					.removeHeaders("*",HEADER_BUSINESSID)
@@ -181,7 +188,8 @@ public class RestEndpoints extends RouteBuilder {
 				.removeHeaders("*", HEADER_BUSINESSID);
 
 		/************************
-		/* Secured route with basic authentication. User list per role (coming from spring xml)
+		/* Secured route with basic authentication.
+		 * GET User list per role (coming from spring xml)
 		 ************************/
 		rest("/secure").description("Basic auth. Try name:'user' passwd:'secret'.")
 		.get("/role/{roleName}").description("User list by role")

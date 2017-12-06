@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class RestConfiguration extends RouteBuilder {
 	private final static Logger log = LoggerFactory.getLogger(RestConfiguration.class);
 	
+	//The properties bean autoconfigured by application properties
 	@Autowired
 	ServerProperties serverProperties;
 	
