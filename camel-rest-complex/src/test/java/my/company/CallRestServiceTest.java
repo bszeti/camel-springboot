@@ -106,7 +106,7 @@ public class CallRestServiceTest extends Assert {
 
 	}
 
-//	@Test
+//	@Test //TODO: Add ssl for http-component
 	public void callRestServiceHttp() throws Exception {
 		Exchange response = producerTemplate.withHeader("country","TEST").to("direct:callRestServiceHttp").send();
 		CitiesResponse citiesResponse = response.getIn().getBody(CitiesResponse.class);

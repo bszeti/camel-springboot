@@ -50,18 +50,18 @@ public class CallRestService extends RouteBuilder {
 			.setHeader(Exchange.HTTP_URI, simple("properties:self.url"))
 			.setHeader(Exchange.HTTP_PATH,simple("/country/${exchangeProperty.country}/cities"))
 			.to("http4:host?throwExceptionOnFailure=false&sslContextParameters=#sslContextParameters") //Make the http request
-			.setBody(bodyAs(String.class))
-			.to("log:afterCallingService?showAll=true&multiline=true")
 			.unmarshal(df) //Unmarshall to object
-			.to("log:callRestServiceHttp4?showAll=true&multiline=true")
 			.removeHeaders("*", HEADER_BUSINESSID)
 			;
 
 		from("direct:callRestServiceHttp").routeId("callRestServiceHttp")
-				.setHeader(Exchange.HTTP_PATH,simple("/country/${header.country}/cities"))
-				.to("{{self.url}}?throwExceptionOnFailure=false") //Make the http request
-				.unmarshal(df) //Unmarshall to object
-				.to("log:callRestServiceHttp?showAll=true&multiline=true")
+			.setProperty("country",header("country"))
+			.removeHeaders("*", HEADER_BUSINESSID)
+			.setHeader(Exchange.HTTP_PATH,simple("/country/${exchangeProperty.country}/cities"))
+			.to("{{self.url}}?throwExceptionOnFailure=false") //Make the http request
+			.unmarshal(df) //Unmarshall to object
+			.to("log:callRestServiceHttp?showAll=true&multiline=true")
+			.removeHeaders("*", HEADER_BUSINESSID)
 		;
 	}
 	
