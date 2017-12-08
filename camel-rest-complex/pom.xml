@@ -99,6 +99,16 @@
       <artifactId>camel-ehcache</artifactId> <!-- TODO: Use camel-ehcache-starter -->
     </dependency>
 
+    <!-- Http clients -->
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-http-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-http4-starter</artifactId>
+    </dependency>
+
     <!-- Swagger -->
     <dependency>
       <groupId>org.apache.camel</groupId>
@@ -160,14 +170,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-undertow-starter</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
         <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-undertow-starter</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
