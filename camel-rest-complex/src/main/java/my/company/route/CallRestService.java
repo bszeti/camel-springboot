@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static my.company.route.RestEndpoints.HEADER_BUSINESSID;
+
 @Component
 public class CallRestService extends RouteBuilder {
 	private static final Logger log = LoggerFactory.getLogger(CallRestService.class);
@@ -41,12 +43,18 @@ public class CallRestService extends RouteBuilder {
 		JsonDataFormat df = new JsonDataFormat(JsonLibrary.Jackson);
 		df.setUnmarshalType(CitiesResponse.class);
 
+
 		from("direct:callRestServiceHttp4").routeId("callRestServiceHttp4")
+			.setProperty("country",header("country"))
+			.removeHeaders("*", HEADER_BUSINESSID)
 			.setHeader(Exchange.HTTP_URI, simple("properties:self.url"))
-			.setHeader(Exchange.HTTP_PATH,simple("/country/${header.country}/cities"))
-			.to("http4:host?throwExceptionOnFailure=false") //Make the http request
+			.setHeader(Exchange.HTTP_PATH,simple("/country/${exchangeProperty.country}/cities"))
+			.to("http4:host?throwExceptionOnFailure=false&sslContextParameters=#sslContextParameters") //Make the http request
+			.setBody(bodyAs(String.class))
+			.to("log:afterCallingService?showAll=true&multiline=true")
 			.unmarshal(df) //Unmarshall to object
 			.to("log:callRestServiceHttp4?showAll=true&multiline=true")
+			.removeHeaders("*", HEADER_BUSINESSID)
 			;
 
 		from("direct:callRestServiceHttp").routeId("callRestServiceHttp")

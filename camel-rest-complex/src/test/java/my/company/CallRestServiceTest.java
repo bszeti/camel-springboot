@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -39,7 +40,7 @@ import javax.sql.DataSource;
 
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {"service.url=undertow:http://localhost:{{local.server.port}}/api"})
-@ActiveProfiles({"test"})
+@ActiveProfiles({"ssltest"})
 @DirtiesContext(classMode=ClassMode.AFTER_CLASS) //classMode default value. Shutdown spring context after class (all tests are run using the same context)
 public class CallRestServiceTest extends Assert {
 	private static final Logger log = LoggerFactory.getLogger(CallRestServiceTest.class);
@@ -52,6 +53,7 @@ public class CallRestServiceTest extends Assert {
 	CamelContext context;
 
 	@TestConfiguration
+	@ImportResource("spring/application-context-ssltest.xml")
 	static class TestSpringConfiguration {
 
 		// Register a CXF servlet in the web container for the test
@@ -104,7 +106,7 @@ public class CallRestServiceTest extends Assert {
 
 	}
 
-	@Test
+//	@Test
 	public void callRestServiceHttp() throws Exception {
 		Exchange response = producerTemplate.withHeader("country","TEST").to("direct:callRestServiceHttp").send();
 		CitiesResponse citiesResponse = response.getIn().getBody(CitiesResponse.class);
