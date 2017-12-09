@@ -38,6 +38,9 @@
 		<cxf:features>
 			<bean class="org.apache.cxf.feature.LoggingFeature"/> <!-- Logs in/out message at INFO level -->
 		</cxf:features>
+		<cxf:outInterceptors>
+			<ref bean="buildAddSignature"/>
+		</cxf:outInterceptors>
 	</cxf:cxfEndpoint>
 
 </beans>
