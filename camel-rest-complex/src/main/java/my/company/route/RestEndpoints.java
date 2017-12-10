@@ -93,7 +93,7 @@ public class RestEndpoints extends RouteBuilder {
 				.end()
 				.removeHeaders("*","businessId")
 			.endRest()
-		.post("/").type(UserApiPojo.class) //The post endpoint doesn't store the user, it only sends back an a succesful response
+		.post("/").type(UserApiPojo.class) //The post endpoint doesn't store the user, it only sends back a successful response
 			//swagger
 			.description("Send user")
 			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transaction id. Defaults to a random uuid").required(false).dataType("string").endParam()

@@ -101,3 +101,44 @@ The example can be built and deployed on OpenShift using a profile:
 To list all the running pods:
 
     oc get pods
+
+## Implementation details
+### SpringBoot application
+The @SpringBootApplication class is also @Configuration, so it can have @Bean methods to create beans. In some cases it may cause "infinite loop" problems in unit tests, so it's probably safer to to have a separate @Configuration class (see AppConfig.java).
+When using Spring XMLs @ImportResource be careful with using "classpath:" or classpath*:" and fixed name or ant-style pattern. See [PathMatchingResourcePatternResolver](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/io/support/PathMatchingResourcePatternResolver.html) for details:
+- classpath:my.file returns the first file from classpath, via the standard java resource lookup
+- classpath\*:my.file returns multiple files from **all** classpath roots (/classes AND /test-classes AND jars)
+- classpath:dir/\*\*/my\*.file returns multiple files under the **first** classpath root having the /dir directory (/classes OR /test-classes)
+- classpath\*:dir/\*\*/my\*.file returns matching files from all classpath roots
+
+### Camel context
+A CamelContext is created automatically (camel-spring-boot-starter) customized by camel.springboot.\* properties.
+- RouteBuilder beans are picked up automatically, don't forget to add @Component to your RouteBuilder class
+- XML DSL routes can be defined in resource files /camel/\*.xml (camel.springboot.xmlRoutes)
+- Rest DSL endpoints can be defined in resource files /camel-rest/\*.xml (camel.springboot.xmlRests)
+- This context can be customized by adding [CamelContextConfiguration](http://static.javadoc.io/org.apache.camel/camel-spring-boot/2.19.1/org/apache/camel/spring/boot/CamelContextConfiguration.html) beans
+
+(!) If a CamelContext bean is created another way (e.g. in a spring XML) the autoconfiguration (and the camel.springboot.\* properties) are ignored.
+
+### Rest DSL
+First a RestConfigurationDefinition is needed in a RouteBuilder (see RestConfiguration.java).
+- It sets how the rest routes bind to a web server. In this case Spring Boot runs the web server (we don't want to start a new one from Camel) so "servlet" is used that requires a "CamelServlet" registered.   
+It's autoconfigured by camel-servlet-starter after v2.19 (for older version see Application.java)
+- Customize the json (Jackson) serializers. Two instance is created, one to unmarshall incoming messages (json.in.\*) and to serialize the response object (json.out.\*)
+- Enable and cusomize swagger, apiContextPath() is required. Make sure to set contextPath() to the CamelServlet's base url (camel.component.servlet.mapping.contextPath)
+
+Rest endpoints can be defined in a RestBuilder like routes starting with rest().
+- The route implementation can be under a verb directly "get().route()...endRest()" or in a direct route "get().to("direct:my")"
+- Make sure to .skipBindingOnErrorCode(false) if a json response body is required in case of errors.
+- Remove received http (or all) headers before the end of the route as they can interfere with the response (e.g. Content-Length)
+- At least one responseMessage()...endResponseMessage() is required to avoid problems with Swagger
+
+### Datasources
+One datasource can be configured in SpringBoot with the spring.datasource.* properties, but it doesn't work if multiple (pooled) datasources are needed (so this example shows a solution that can be used for multiple).  
+Datasources could be created by a custom factory class or via code somehow mapping custom properties from config file. But the easiest way is to create a Properties instance with values added by @ConfigurationProperties(prefix="mydatasource") and then use this object to create the Apache DBCP2 BasicDataSource instance. This way all the pool properties can be set and also the /configprops actuator endpoint shows the properties correctly (masking the password). One datasource must be marked @Primary.
+
+The destroyMethod should be disabled for the datasource beans to avoid warning caused by multiple shutdown by Camel and Spring context.
+
+### SQL stored procedure
+The sql-stored component requires the signature of the called stored procedure (see GetCityZips.java). This template can be put directly in the endpoint url (that looks ugly), can come from a resource file or from the current message body.  
+The resource file is probably the best solution, but the template language currently doesn't support property placeholders (e.g. to insert database schema), so it can't be customized per environment. The template language only supports "${header.myheader}" expressions for IN parameters, no other simple expressions are allowed. The workaround here is to use "useMessageBodyForTemplate=true" and take the template from message body.
