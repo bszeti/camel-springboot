@@ -34,7 +34,7 @@ public class GetCityZips extends RouteBuilder {
 			"  OUT CHAR MESSAGE\n" + 
 			")";
 	
-	@Value("${cityInfoDatabase.schema:#{null}}") //default value is null. It's required is SpEL otherwise the missing property causes an exception
+	@Value("${cityInfo.datasource.schema:#{null}}") //default value is null. It's required is SpEL otherwise the missing property causes an exception
 	String schema;
 
 	@Override

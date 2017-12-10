@@ -9,8 +9,8 @@
     <!-- Roles -->
     <beans profile="test">
         <util:map id="roles" key-type="java.lang.String" value-type="java.util.List">
-            <entry key="dreamer" value="#{{@user1}}"/>
-            <entry key="agent" value="#{{@user6}}"/>
+            <entry key="member" value="#{{@user1}}"/>
+            <entry key="admin" value="#{{@user6}}"/>
         </util:map>
     </beans>
 

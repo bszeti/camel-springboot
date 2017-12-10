@@ -96,7 +96,7 @@ public class RestEndpoints extends RouteBuilder {
 		.post("/").type(UserApiPojo.class) //The post endpoint doesn't store the user, it only sends back an a succesful response
 			//swagger
 			.description("Send user")
-			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transaction id. Defaults to a random uuid").dataType("string").endParam()
+			.param().name(HEADER_BUSINESSID).type(RestParamType.header).description("Business transaction id. Defaults to a random uuid").required(false).dataType("string").endParam()
 			.responseMessage().code(200).responseModel(ApiResponse.class).endResponseMessage() //OK
 			.responseMessage().code(400).responseModel(ApiResponse.class).message("Unexpected body").endResponseMessage() //Wrong input
 			.responseMessage().code(500).responseModel(ApiResponse.class).endResponseMessage() //Not-OK
@@ -193,7 +193,7 @@ public class RestEndpoints extends RouteBuilder {
 		 ************************/
 		rest("/secure").description("Basic auth. Try name:'user' passwd:'secret'.")
 		.get("/role/{roleName}").description("User list by role")
-				.param().name("roleName").type(RestParamType.path).allowableValues("dreamer","agent").dataType("string").endParam()
+				.param().name("roleName").type(RestParamType.path).allowableValues("member","admin").dataType("string").endParam()
 				.responseMessage().code(200).endResponseMessage()
 			.route().routeId("secure-get")
 				.log("Secure is called")
