@@ -35,7 +35,7 @@
 	<!-- This is an example how to define beans for different profiles in one file. It's cleaner to do this in separate files -->
 	<beans profile="default,ssl">
 		<util:map id="roles" key-type="java.lang.String" value-type="java.util.List">
-			<entry key="member" value="#{{@user1,@user2,@user3}}"/>
+			<entry key="member" value="#{{@user1,@user2,@user3}}"/> <!-- Using SpEL is a simple way to create a list of beans -->
 			<entry key="admin" value="#{{@user4}}"/>
 		</util:map>
 	</beans>
