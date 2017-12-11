@@ -74,10 +74,9 @@ public class AppConfig {
 	 * Example to create a WSS4JOutInterceptor to add WS security signature headers for CXF client
 	 */
     //See https://ws.apache.org/wss4j/config.html
-    @Autowired //autowire PrivateKey
-    @Bean
+    @Autowired //autowire PrivateKey argument
+    @Bean("addSignatureInterceptor")
 	WSS4JOutInterceptor buildAddSignature(PrivateKey privateKey){
-        log.info("PrivateKey: {}", privateKey);
         Map<String,Object> securityProperties = new HashMap<>();
 
         if (StringUtils.isNotBlank(privateKey.getKeystore())) {
@@ -116,7 +115,7 @@ public class AppConfig {
 	}
 
 	@ConfigurationProperties(prefix = "GlobalWeather.signatureKey")
-    @Component
+    @Component //Create a PrivateKey bean from properties
 	public class PrivateKey{
         private String keystore;
         private String password;

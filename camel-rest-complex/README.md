@@ -133,12 +133,26 @@ Rest endpoints can be defined in a RestBuilder like routes starting with rest().
 - Remove received http (or all) headers before the end of the route as they can interfere with the response (e.g. Content-Length)
 - At least one responseMessage()...endResponseMessage() is required to avoid problems with Swagger
 
-### Datasources
-One datasource can be configured in SpringBoot with the spring.datasource.* properties, but it doesn't work if multiple (pooled) datasources are needed (so this example shows a solution that can be used for multiple).  
-Datasources could be created by a custom factory class or via code somehow mapping custom properties from config file. But the easiest way is to create a Properties instance with values added by @ConfigurationProperties(prefix="mydatasource") and then use this object to create the Apache DBCP2 BasicDataSource instance. This way all the pool properties can be set and also the /configprops actuator endpoint shows the properties correctly (masking the password). One datasource must be marked @Primary.
+The number of http requests processed parallel depends on the server's worker thread pool, see properties:
+- server.undertow.worker-threads
+- server.tomcat.max-threads
+- server.jetty.acceptors
 
-The destroyMethod should be disabled for the datasource beans to avoid warning caused by multiple shutdown by Camel and Spring context.
+
+### Datasources
+One datasource can be configured in SpringBoot with the *spring.datasource.\** properties, but it doesn't work if multiple (pooled) datasources are needed (so this example shows a solution that can be used for multiple).  
+Datasources could be created by a custom factory class or via code somehow mapping custom properties from config file. But the easiest way is to create a Properties instance with values added by @ConfigurationProperties(prefix="mydatasource") and then use this object to create the [Apache DBCP2](https://commons.apache.org/proper/commons-dbcp/) BasicDataSource instance. This way all the pool properties can be set and also the /configprops actuator endpoint shows the properties correctly (masking the password).
+
+The *destroyMethod=""* should be set for the datasource beans to avoid warning caused by multiple close() calls by Camel and Spring context. In case of multiple datsources one must be annotated as @Primary.
 
 ### SQL stored procedure
 The sql-stored component requires the signature of the called stored procedure (see GetCityZips.java). This template can be put directly in the endpoint url (that looks ugly), can come from a resource file or from the current message body.  
-The resource file is probably the best solution, but the template language currently doesn't support property placeholders (e.g. to insert database schema), so it can't be customized per environment. The template language only supports "${header.myheader}" expressions for IN parameters, no other simple expressions are allowed. The workaround here is to use "useMessageBodyForTemplate=true" and take the template from message body.
+The resource file is probably the best solution, but the template language currently doesn't support property placeholders (e.g. to insert database schema), so it can't be customized per environment. The template language only supports *${header.myheader}* expressions for IN parameters, no other "simple-like" expressions are allowed. The workaround here is to use *useMessageBodyForTemplate=true* and take the template from message body, that can have any customized string.
+
+### CXF client
+First generate java classes from the wsdl file by using the 'wsdl2java' tool coming with [Apache CXF](http://cxf.apache.org/). These classes should be added to the project (needed on the classpath) as they represent the service and it's data objects.  
+The easiest is to create the CXF endpoint bean in xml using the *http://camel.apache.org/schema/cxf* namespace using the @SOAPBinding interface as serviceClass. This bean should be used in the Camel CXF producer *to("cxf:bean:myCxfEndpointBean")* to make the soap call.
+- By default the client makes asyncronous calls executing the request in another thread. If this is not needed because the caller thread has to wait for the response (InOut), enable *synchronous=true*.  
+For async the CXF client uses a ThreadPoolExecutor with 5-25 *default-workqueue* threads and 256 max queue size with Abort policy (see [AutomaticWorkQueueImpl](https://cxf.apache.org/javadoc/latest/org/apache/cxf/workqueue/AutomaticWorkQueueImpl.html))
+- By default Java HttpURLConnection is used to make connections. It uses keep-alive for HTTP connections automatically.
+- Apache HttpAsynClient can be used with CXF by adding [*cxf-rt-transports-http-hc*](http://cxf.apache.org/docs/asynchronous-client-http-transport.html), but it's used only for async reuests by default and adds an extra layer of threads to the call stack which doesn't sound ok. See application-context.xml how to enable it if it's still needed.

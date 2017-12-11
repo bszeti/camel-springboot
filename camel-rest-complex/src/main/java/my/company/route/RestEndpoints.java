@@ -41,6 +41,7 @@ public class RestEndpoints extends RouteBuilder {
 		
 	@Override
 	public void configure() throws Exception {
+
 		/************************
 		 * common exception handlers for all routes defined in this RouteBuilder
 		 ************************/
