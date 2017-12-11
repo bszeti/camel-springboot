@@ -23,8 +23,7 @@
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version> <!-- Unit test runner were created before the tests with 2.19 -->
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
     <spring-boot-plugin.version>1.5.4.RELEASE</spring-boot-plugin.version>
-    <!--<fabric8.maven.plugin.version>3.1.80.redhat-000010</fabric8.maven.plugin.version>-->
-    <fabric8.maven.plugin.version>3.5.33</fabric8.maven.plugin.version>
+    <fabric8.maven.plugin.version>3.1.80</fabric8.maven.plugin.version> <!-- Tested with Red Hat CDK 3.0 -->
     <git-commit-id-plugin.version>2.2.3</git-commit-id-plugin.version>
   </properties>
 
