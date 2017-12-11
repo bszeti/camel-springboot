@@ -46,6 +46,13 @@
 		</cxf:outInterceptors>
 	</cxf:cxfEndpoint>
 
+	<!-- Add SSL settings for CXF if needed. The resource is looked up on file system and on classpath too. -->
+	<!--<camel:sslContextParameters id="sslContextParameters">-->
+		<!--<camel:trustManagers >-->
+			<!--<camel:keyStore resource="myTruststore.jks" password="changeit"/>-->
+		<!--</camel:trustManagers>-->
+	<!--</camel:sslContextParameters>-->
+
 	<!-- Using CXF with HttpAsyncClient is not suggested as it adds an extra layer of threads, but here is an example.
 		 See http://cxf.apache.org/docs/asynchronous-client-http-transport.html
 		 use this bus in cxfEndpoint
