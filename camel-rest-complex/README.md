@@ -103,6 +103,8 @@ To list all the running pods:
 
     oc get pods
 
+Open OpenShift web console and Click *Open Java Console* on the pod to access hawtio. 
+
 ## Implementation details and lessons learned
 ### SpringBoot application
 The @SpringBootApplication class is also @Configuration, so it can have @Bean methods to create beans. In some cases it may cause "infinite loop" problems in unit tests, so it's probably safer to have a separate @Configuration class (see AppConfig.java).
