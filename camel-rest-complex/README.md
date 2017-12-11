@@ -102,7 +102,7 @@ To list all the running pods:
 
     oc get pods
 
-## Implementation details
+## Implementation details and lessons learned
 ### SpringBoot application
 The @SpringBootApplication class is also @Configuration, so it can have @Bean methods to create beans. In some cases it may cause "infinite loop" problems in unit tests, so it's probably safer to to have a separate @Configuration class (see AppConfig.java).
 When using Spring XMLs @ImportResource be careful with using "classpath:" or classpath*:" and fixed name or ant-style pattern. See [PathMatchingResourcePatternResolver](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/io/support/PathMatchingResourcePatternResolver.html) for details:
@@ -138,6 +138,11 @@ The number of http requests processed parallel depends on the server's worker th
 - server.tomcat.max-threads
 - server.jetty.acceptors
 
+The Rest DSL currently doesn't support automatic body or header validations, so it should be done in the route.
+- [Camel bean-validator](http://camel.apache.org/bean-validation.html) can be used to verify annotated POJOs (e.g. received request body).
+- For header validation a workaround is to create a POJO with fields matching the expected headers (see HeaderValidationsPojo.java). Register a DozerTypeConverter to convert Map to this POJO class and then this expression works to create the object *simple("${headers}",HeaderValidationsPojo.class)*, which can be validated with bean-validator.  
+See Application.java contextConfiguration() and route "user-get".
+- The object for validation must be set the current Exchange body for bean-validator.
 
 ### Datasources
 One datasource can be configured in SpringBoot with the *spring.datasource.\** properties, but it doesn't work if multiple (pooled) datasources are needed (so this example shows a solution that can be used for multiple).  
@@ -155,4 +160,16 @@ The easiest is to create the CXF endpoint bean in xml using the *http://camel.ap
 - By default the client makes asyncronous calls executing the request in another thread. If this is not needed because the caller thread has to wait for the response (InOut), enable *synchronous=true*.  
 For async the CXF client uses a ThreadPoolExecutor with 5-25 *default-workqueue* threads and 256 max queue size with Abort policy (see [AutomaticWorkQueueImpl](https://cxf.apache.org/javadoc/latest/org/apache/cxf/workqueue/AutomaticWorkQueueImpl.html))
 - By default Java HttpURLConnection is used to make connections. It uses keep-alive for HTTP connections automatically.
-- Apache HttpAsynClient can be used with CXF by adding [*cxf-rt-transports-http-hc*](http://cxf.apache.org/docs/asynchronous-client-http-transport.html), but it's used only for async reuests by default and adds an extra layer of threads to the call stack which doesn't sound ok. See application-context.xml how to enable it if it's still needed.
+- Apache HttpAsynClient can be used with CXF by adding [*cxf-rt-transports-http-hc*](http://cxf.apache.org/docs/asynchronous-client-http-transport.html), but it's used only for async reuests by default and adds an extra layer of threads to the call stack which doesn't sound ok. See application-context.xml how to enable it also for synchronous requests if it's still needed.
+
+### EhCache
+EhCache 3 config xml can be added and referenced in Camel Ehcache endpoint
+- If key and value type other than *Object* is set in the ehcache config, it must be added to all Camel endpoints too.   
+
+### Logging with MDC
+MDC logging can be enabled in a CamelContextConfiguration and then %X{camel...} expressions can be used in slf4j log pattern.
+
+To customize what is put in the MDC context, implement a custom UnitOfWork. Also a custom UnitOfWorkFactory bean must be instantiated which is automatically used by the Camel context.  
+See CustomMDCBreadCrumbIdUnitOfWork.java where camel.breadcrumbId is overwritten with a received correlation header that defaults to a UUID. Factory bean is in Application.java.
+
+Slf4j also supports automatic regexp replace (e.g. to hide sensitive fields), see pattern is logback.xml (also works of course in SpringBoot property logging.pattern). 
