@@ -70,7 +70,11 @@
 	<!-- CXF Rest client -->
 	<cxf:rsClient id="cxfRsClient" address="${self.url}" loggingFeatureEnabled="true">
 		<cxf:providers>
-			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" >
+				<constructor-arg>
+					<bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"/> <!-- Factory for ObjectMapper, registers JavaTimeModule automatically -->
+				</constructor-arg>
+			</bean>
 		</cxf:providers>
 	</cxf:rsClient>
 </beans>
