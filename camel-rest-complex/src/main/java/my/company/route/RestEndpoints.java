@@ -142,7 +142,7 @@ public class RestEndpoints extends RouteBuilder {
 					.bean("restbuilder","errorResponse(4000,'Not found')")
 					.end()
 
-				.log("Getting cities for ${header.country}")
+				.log("Getting cities for ${header.country}").id("first")
 
 				//Save input headers/values needed later as ExchangeProperty
 				.setProperty("country",header("country"))

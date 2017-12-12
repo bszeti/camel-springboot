@@ -37,9 +37,11 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
+import java.util.function.Consumer;
 
 @RunWith(CamelSpringBootRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {"service.url=undertow:http://localhost:{{local.server.port}}/api"})
+@UseAdviceWith
 @ActiveProfiles({"ssltest"})
 @DirtiesContext(classMode=ClassMode.AFTER_CLASS) //classMode default value. Shutdown spring context after class (all tests are run using the same context)
 public class CallRestServiceTest extends Assert {
@@ -90,7 +92,22 @@ public class CallRestServiceTest extends Assert {
 
 	@Before
 	public void before() throws Exception {
+		if (context.getStatus()==ServiceStatus.Stopped) {
 
+			//Throw exception if country==ERROR
+			context.getRouteDefinition("get-cities-with-zip").adviceWith(context, new AdviceWithRouteBuilder() {
+				@Override
+				public void configure() throws Exception {
+					weaveById("first").before()
+							.choice()
+								.when(header("country").isEqualTo("ERROR"))
+								.throwException(new Exception("test"))
+								.end();
+				}
+			});
+
+			context.start();
+		}
 	}
 
 
@@ -116,6 +133,36 @@ public class CallRestServiceTest extends Assert {
 		assertEquals("AA", citiesResponse.getCities().get(0).getName());
 		assertEquals("ZIP-AA", citiesResponse.getCities().get(0).getZips().get(0));
 
+	}
+
+	@Test
+	public void callRestServiceCXF() throws Exception {
+		Exchange response = producerTemplate
+				.withHeader("country","TEST")
+				.to("direct:callRestServiceCxf")
+				.request(Exchange.class); //Uses ExchangePattern.InOut
+
+		CitiesResponse citiesResponse = response.getIn().getBody(CitiesResponse.class);
+		log.info("citiesResponse: {}",citiesResponse);
+
+		assertEquals("TEST", citiesResponse.getCountry());
+		assertEquals("AA", citiesResponse.getCities().get(0).getName());
+		assertEquals("ZIP-AA", citiesResponse.getCities().get(0).getZips().get(0));
+
+	}
+
+
+	@Test
+	public void callRestServiceCXFError() throws Exception {
+		Exchange response = producerTemplate
+				.withHeader("country","ERROR")
+				.to("direct:callRestServiceCxf")
+				.request(Exchange.class); //Uses ExchangePattern.InOut
+
+		String body = response.getIn().getBody(String.class);
+		log.info("Error message: {}",body);
+
+		assertEquals("Failed to call rest service. status:500 body:{\"code\":5000,\"message\":\"test\"}",body);
 	}
 
 }

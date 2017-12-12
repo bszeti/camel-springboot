@@ -66,4 +66,11 @@
 		</camel:trustManagers>
 	</camel:sslContextParameters>
 
+
+	<!-- CXF Rest client -->
+	<cxf:rsClient id="cxfRsClient" address="${self.url}" loggingFeatureEnabled="true">
+		<cxf:providers>
+			<bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider" />
+		</cxf:providers>
+	</cxf:rsClient>
 </beans>
