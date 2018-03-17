@@ -8,6 +8,7 @@ def envProd = utils.environmentNamespace('run')
 
 mavenNode {
   checkout scm
+  dir('camel-rest-complex'){
   if (utils.isCI()){
 
     mavenCI{}
@@ -53,5 +54,6 @@ if (utils.isCD()){
         }
       }
     }
+  }
   }
 }
