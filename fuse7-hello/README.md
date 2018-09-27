@@ -1,5 +1,5 @@
 ## Simple HelloWorld rest api using Fuse7 BOM
-The projects build executebale Spring Boot fat jar and also can be run in OpenShift.
+The projects build executable Spring Boot fat jar and also can be run in OpenShift.
 
 ### Build and run
 The Red Hat maven repos are configured in configuration/settings.xml
@@ -9,19 +9,23 @@ Run locally:
 Or with spring-boot-maven-plugin:
   mvn -s configuration/settings.xml spring-boot:run
 Try:  
-  http://localhost:8080/api/hello
-  http://localhost:8080/api/hello/MyName
-Deploy to minishift: mvn -s configuration/settings.xml clean install -P fabric8
-  http://fuse7-hello-myproject.192.168.99.100.nip.io/api/hello
+  curl -k http://localhost:8080/api/hello
+  curl -k http://localhost:8080/api/hello/MyName
+Deploy to minishift:
+  mvn -s configuration/settings.xml clean install -P fabric8
+  curl -k http://fuse7-hello-myproject.192.168.99.100.nip.io/api/hello
 
-### Minishift 
+### Prepare Minishift
 Download: https://developers.redhat.com/products/cdk/overview/
   minishift config set vm-driver virtualbox
   minishift setup-cdk 
     -> This creates a ~/.minishift directory. You can always delete that to start from scratch.
   minishift start --memory 4GB
-    --> The memory settings are actually fixed after the first start
-  admin/admin or developer/developer are two existing users
+    -> The memory settings are actually fixed after the first start
+  oc login -u system:admin
+    -> use admin/admin or developer/developer on console
+  oc create -n openshift -f https://raw.githubusercontent.com/jboss-fuse/application-templates/application-templates-2.1.fuse-710017-redhat-00006/fis-image-streams.json
+    -> Ignore error "fis-*-openshift already exists"
 
 ### Documentation:
   Fuse on Openshift: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.1/html-single/fuse_on_openshift_guide/

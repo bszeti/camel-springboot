@@ -136,6 +136,7 @@
 
     <profiles>
         <profile>
+            <!-- Enable this profile to deploy to a OpenShift cluster with "mvn install" -->
             <id>fabric8</id>
             <build>
                 <plugins>
@@ -146,7 +147,8 @@
                             <execution>
                                 <goals>
                                     <goal>resource</goal>
-                                    <goal>build</goal>
+                                    <goal>build</goal> <!-- Create image and image stream -->
+                                    <goal>deploy</goal><!-- Create deployment config and service -->
                                 </goals>
                             </execution>
                         </executions>
