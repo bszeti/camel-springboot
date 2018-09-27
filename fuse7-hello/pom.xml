@@ -67,7 +67,7 @@
             <groupId>io.fabric8</groupId>
             <artifactId>spring-cloud-kubernetes-core</artifactId>
         </dependency>
-        
+
         <!-- testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
