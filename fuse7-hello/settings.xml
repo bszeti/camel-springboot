@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<settings>
+
+    <profiles>
+        <profile>
+            <id>extra-repos</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>central</id>
+                    <url>http://repo1.maven.org/maven2</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>jboss-public</id>
+                    <name>JBoss Public Repository Group</name>
+                    <url>http://repository.jboss.org/nexus/content/groups/public</url>
+                </repository>
+                <repository>
+                    <id>jboss-fs-public</id>
+                    <name>FS JBoss Public Repository Group</name>
+                    <url>http://repository.jboss.org/nexus/content/groups/fs-public
+                    </url> <!-- or http://repo.fusesource.com/nexus/content/groups/public -->
+                </repository>
+                <repository>
+                    <id>fuse-ea</id>
+                    <name>JBoss EA Repository</name>
+                    <url>http://repository.jboss.org/nexus/content/groups/ea
+                    </url> <!-- or http://repo.fusesource.com/nexus/content/groups/ea -->
+                </repository>
+                <repository>
+                    <id>techpreview</id>
+                    <name>Enterprise Releases</name>
+                    <url>http://maven.repository.redhat.com/techpreview/all</url>
+                </repository>
+                <repository>
+                    <id>redhatga</id>
+                    <name>Enterprise Releases</name>
+                    <url>http://maven.repository.redhat.com/ga</url>
+                </repository>
+                <repository>
+                    <id>redhatearly</id>
+                    <name>Enterprise Releases</name>
+                    <url>http://maven.repository.redhat.com/earlyaccess/all</url>
+                </repository>
+            </repositories>
+
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>central</id>
+                    <url>http://repo1.maven.org/maven2</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>jboss-public</id>
+                    <name>JBoss Public Repository Group</name>
+                    <url>http://repository.jboss.org/nexus/content/groups/public</url>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>jboss-fs-public</id>
+                    <name>FS JBoss Public Repository Group</name>
+                    <url>http://repository.jboss.org/nexus/content/groups/fs-public</url>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>fuse-ea</id>
+                    <name>JBoss EA Repository</name>
+                    <url>http://repository.jboss.org/nexus/content/groups/ea/</url>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>enterprise</id>
+                    <name>Enterprise Releases</name>
+                    <url>http://maven.repository.redhat.com/techpreview/all/</url>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>extra-repos</activeProfile>
+    </activeProfiles>
+
+</settings>
