@@ -19,28 +19,47 @@ Try:
   curl -k http://localhost:8080/api/hello/MyName
 
 Deploy to minishift:
-
+ 
+  oc project myproject
   mvn -s ../configuration/settings.xml clean install -P fabric8
   curl -k http://fuse7-hello-myproject.192.168.99.100.nip.io/api/hello
 
 ### Prepare Minishift
 
-Download: https://developers.redhat.com/products/cdk/overview/
+Download (min v3.7.0): https://developers.redhat.com/products/cdk/overview/
 
   minishift config set vm-driver virtualbox
   minishift setup-cdk
   #This creates a ~/.minishift directory. You can always delete that to start from scratch.
 
-  minishift start --memory 4GB
-  #The memory settings are actually fixed after the first start
+  minishift start --memory 4GB --openshift-version 3.11.69
+  #Use the latest 3.11.x OpenShift version. Run _minishift delete_ to remove the VM and start with different parameters next time.
 
   oc login -u system:admin
   #Use admin/admin or developer/developer on console
 
-Add Fuse7 image streams:
+Add your Red Hat Devloper credentials for Fuse7 builder to enable download from registry.redhat.io.
+ 
+  oc login -u system:admin
+  oc project myproject
+  oc create secret docker-registry imagestreamsecret --docker-username=me@mycompany.com --docker-password=xxx --docker-server=registry.redhat.io
+  oc secrets link builder imagestreamsecret
+  
+You can verify that secret was added as Mountable secret:
 
-  oc create -n openshift -f https://raw.githubusercontent.com/jboss-fuse/application-templates/application-templates-2.1.fuse-710017-redhat-00006/fis-image-streams.json
-  #Ignore error "fis-*-openshift already exists"
+  $ oc describe sa builder
+  Name:                builder
+  Namespace:           openshift
+  Labels:              <none>
+  Annotations:         <none>
+  Image pull secrets:  builder-dockercfg-jrpl4
+  Mountable secrets:   builder-token-f2srd
+                       builder-dockercfg-jrpl4
+                       imagestreamsecret
+  Tokens:              builder-token-68dkx
+                       builder-token-f2srd 
+
+Now the fabric8-maven-plugin should be abble to deploy the Fuse7 app in the _myproject_ namespace.
 
 ### Documentation
 
