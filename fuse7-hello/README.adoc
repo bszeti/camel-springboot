@@ -47,8 +47,9 @@ Download (min v3.7.0): https://developers.redhat.com/products/cdk/overview/
   minishift setup-cdk
   #This creates a ~/.minishift directory. You can always delete that to start from scratch.
 
+Use the [latest](https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html) 3.11.x OpenShift version. Run _minishift delete_ to remove the VM and start with different parameters next time.
+
   minishift start --memory 4GB --openshift-version 3.11.69
-  #Use the [latest](https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html) 3.11.x OpenShift version. Run _minishift delete_ to remove the VM and start with different parameters next time.
 
   oc login -u system:admin
   #Use admin/admin or developer/developer on console
