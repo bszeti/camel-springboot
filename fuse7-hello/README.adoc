@@ -1,4 +1,4 @@
-## Simple HelloWorld REST api using Fuse7.1 BOM
+## Simple HelloWorld REST api using Fuse7.2 BOM
 The projects build executable Spring Boot fat jar and also can be run in OpenShift.
 
 ### Build and run
@@ -44,7 +44,7 @@ Add Fuse7 image streams:
 
 ### Documentation
 
- - Fuse on Openshift: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.1/html-single/fuse_on_openshift_guide/
- - All Fuse docs: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.1/
- - SpringBoot: https://docs.spring.io/spring-boot/docs/1.5.13.RELEASE/reference/htmlsingle/
+ - Fuse on Openshift: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.2/html-single/fuse_on_openshift_guide/
+ - All Fuse docs: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.2/
+ - SpringBoot: https://docs.spring.io/spring-boot/docs/1.5.16.RELEASE/reference/htmlsingle/
  - Camel Rest DSL: https://github.com/apache/camel/blob/master/camel-core/src/main/docs/rest-dsl.adoc
