@@ -58,8 +58,11 @@ Add your Red Hat Devloper credentials for Fuse7 builder to enable download from 
  
   oc login -u system:admin
   oc project myproject
-  oc create secret docker-registry imagestreamsecret --docker-username=me@mycompany.com --docker-password=xxx --docker-server=registry.redhat.io
-  oc secrets link builder imagestreamsecret
+  # This is how you can create the secret, but it may already be prepared by Minishift under the 'openshift' namespace:
+  # oc create secret docker-registry imagestreamsecret --docker-username=me@mycompany.com --docker-password=xxx --docker-server=registry.redhat.io
+  # Simply export/import the secret to your namespace:
+  oc get --export secret -o yaml -n openshift imagestreamsecret | oc create -f -
+  oc secrets link builder imagestreamsecret --for=pull,mount
   
 You can verify that secret was added as Mountable secret:
 
@@ -69,6 +72,7 @@ You can verify that secret was added as Mountable secret:
   Labels:              <none>
   Annotations:         <none>
   Image pull secrets:  builder-dockercfg-jrpl4
+                       imagestreamsecret
   Mountable secrets:   builder-token-f2srd
                        builder-dockercfg-jrpl4
                        imagestreamsecret
