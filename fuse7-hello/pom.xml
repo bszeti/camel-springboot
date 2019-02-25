@@ -149,8 +149,7 @@
                             <execution>
                                 <goals>
                                     <goal>resource</goal>
-                                    <goal>build</goal> <!-- Create image and image stream -->
-                                    <goal>deploy</goal><!-- Create deployment config and service -->
+                                    <goal>build</goal> <!-- Create image and image stream. It will trigger redeployment automatically -->
                                 </goals>
                             </execution>
                         </executions>
