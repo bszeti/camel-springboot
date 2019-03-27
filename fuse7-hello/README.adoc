@@ -43,17 +43,17 @@ or delete the deployed resources:
 
 Download (min v3.7.0): https://developers.redhat.com/products/cdk/overview/
 
-  minishift config set vm-driver virtualbox
-  minishift 
   minishift setup-cdk
   #This creates a ~/.minishift directory. You can always delete that to start from scratch.
 
 Use the link:https://docs.openshift.com/container-platform/3.11/release_notes/ocp_3_11_release_notes.html[latest] 3.11.x OpenShift version. Run _minishift delete_ to remove the VM and start with different parameters next time.
 
   # To avoid "Checking if requested OpenShift version ... is valid ... FAIL"
+  minishift config set vm-driver virtualbox
   minishift config set skip-check-openshift-release true
+  minishift config view
   minishift addons disable anyuid
-  minishift start --memory 4GB --openshift-version 3.11.69
+  minishift start --memory 6GB --openshift-version 3.11.69
 
   oc login -u system:admin
   #Use admin/admin or developer/developer on console
