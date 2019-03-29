@@ -1,6 +1,11 @@
 package com.mycompany.fuse7hello;
 
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
 import org.apache.camel.Header;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.language.Simple;
@@ -49,6 +54,20 @@ public class Routes extends RouteBuilder {
                 .setBody(method(this,"setHelloWithName"))
                 .removeHeaders("*")
                 .endRest()
+
+            //Some additional APIs to test memory heavy or cpu intensive workloads
+            .get("memory/{mb}")
+                .route()
+                .setBody().method(this,"createObject")
+                .endRest()
+            .get("cpu/{iteration}")
+                .route()
+                .setBody().method(this,"cpuLoad")
+                .endRest()
+            .get("threads/{threads}/cpu/{iteration}")
+                .route()
+                .setBody().method(this,"multiThreadCpuLoad")
+                .endRest()
         ;
 
     }
@@ -56,5 +75,39 @@ public class Routes extends RouteBuilder {
     //Get exchange header and add to response
     public HelloResponse setHelloWithName(@Simple("${properties:my.greeting} ${header.name}!") String message){
         return new HelloResponse(message);
+    }
+
+    //Create a big object on heap
+    public Integer createObject(@Header("mb") Integer mb){
+        byte[] one = new byte[mb*1024*1024];
+        return mb;
+    }
+
+    //Do some cpu intensive calculation
+    public Long cpuLoad(@Header("iteration") Long iteration){
+        double response =0.5;
+        long start = System.currentTimeMillis();
+        for (long i=0; i<iteration;i++){
+            response = i%2==0 ? Math.pow(response,2.0) : Math.sqrt(response);
+            if (i%(iteration/10) == 0) log.info("Iteration: {}",i);
+        }
+        long time = System.currentTimeMillis()-start;
+        log.info("Time {}: {}",iteration,time);
+        return time;
+    }
+
+    //Run cpu intensive tasks on multiple threads
+    public Long multiThreadCpuLoad(@Header("threads") int threads, @Header("iteration") Long iteration) throws InterruptedException{
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        long start = System.currentTimeMillis();
+        for (int i=0; i<threads; i++) {
+            executor.submit(()->this.cpuLoad(iteration));
+        }
+        executor.shutdown();
+        executor.awaitTermination(20, TimeUnit.MINUTES);
+
+        long time = System.currentTimeMillis()-start;
+        log.info("Total time {}/{}: {}",threads,iteration,time);
+        return time;
     }
 }
