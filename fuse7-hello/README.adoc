@@ -86,6 +86,21 @@ You can verify that secret was added as Mountable secret:
   
 Now the fabric8-maven-plugin should be abble to deploy the Fuse7 app in the _myproject_ namespace.
 
+### Jolokia
+
+If the "Open Jolokia Console" drops an authentication error, you can disable Jolokia authentication by adding these environment variables to the deployment:
+
+* AB_JOLOKIA_HTTPS=true
+* AB_JOLOKIA_AUTH_OPENSHIFT=false
+* AB_JOLOKIA_PASSWORD_RANDOM=false
+
+
+ sh-4.2$ cat /opt/jolokia/etc/jolokia.properties
+ host=*
+ port=8778
+ discoveryEnabled=false
+ protocol=https
+
 ### Documentation
 
  - Fuse on Openshift: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.2/html-single/fuse_on_openshift_guide/
