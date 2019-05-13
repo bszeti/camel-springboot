@@ -201,9 +201,19 @@
           </execution>
         </executions>
       </plugin>
-      
-      <!-- Generate git.properties used by /info endpoint -->
-	<plugin>
+     
+    </plugins>
+    
+  </build>
+
+  <!-- Run with "-P fabric8" to enable OpenShift deployment -->
+  <profiles>
+    <profile>
+      <id>git</id>
+      <build>
+        <plugins>
+	<!-- Generate git.properties used by /info endpoint -->
+	  <plugin>
 		<groupId>pl.project13.maven</groupId>
 		<artifactId>git-commit-id-plugin</artifactId>
 		<version>${git-commit-id-plugin.version}</version>
@@ -224,13 +234,10 @@
 			<generateGitPropertiesFile>true</generateGitPropertiesFile>
 			<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
 		</configuration>
-      </plugin>
-    </plugins>
-    
-  </build>
-
-  <!-- Run with "-P fabric8" to enable OpenShift deployment -->
-  <profiles>
+          </plugin>
+	</plugins>
+      </build>
+    </profile>
     <profile>
       <id>fabric8</id>
       <build>
