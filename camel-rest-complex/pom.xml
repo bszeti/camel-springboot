@@ -218,6 +218,7 @@
 		</executions>
 		<!-- Configuration is copied from spring-boot-starter-parent -->
 		<configuration>
+			<dotGitDirectory>../.git</dotGitDirectory>
 			<verbose>true</verbose>
 			<dateFormat>yyyy-MM-dd'T'HH:mmZ</dateFormat>
 			<generateGitPropertiesFile>true</generateGitPropertiesFile>
