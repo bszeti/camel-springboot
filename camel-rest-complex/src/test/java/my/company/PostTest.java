@@ -95,7 +95,6 @@ public class PostTest extends Assert {
 		//Send a message to user api post endpoint using the FluentProducerTemplate
 		userApiFluentProducer.withHeader(Exchange.HTTP_METHOD, HttpMethod.POST)
 				.withHeader(Exchange.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON)
 				.withBody("{\"age\": 20, \"name\": \"Test User\"}")
 				.send();
 
@@ -119,8 +118,7 @@ public class PostTest extends Assert {
 		//Send a message to each post endpoint
 		ExchangeBuilder builder = ExchangeBuilder.anExchange(context)
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.POST)
-				.withHeader(Exchange.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON);
+				.withHeader(Exchange.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 		Exchange outExchangeUser = builder.withBody("{\"age\": 21, \"name\": \"My Name\"}").build();
 		Exchange outExchangeCountry = builder.withBody("{\"iso\": \"EN\", \"country\": \"England\"}").build();
 

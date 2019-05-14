@@ -28,9 +28,9 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import javax.sql.DataSource;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -81,7 +81,7 @@ public class StoredProcTest extends Assert {
 		fluentProducerTemplate
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.GET)
 				.withHeader(Exchange.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON);
+				;
 
 		//Reset mock endpoint and set response by current test
 		mockGlobalWeather.reset();

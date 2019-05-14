@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -47,7 +46,6 @@ public class BusinessIdTest extends Assert {
 		// Call get
 		Exchange response = fluentProducerTemplate.to("undertow:http://localhost:{{local.server.port}}/api/user/1")
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.GET)
-				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON)
 				.send();
 		
 		assertEquals(200, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
@@ -59,7 +57,6 @@ public class BusinessIdTest extends Assert {
 		// Call get
 		Exchange response = fluentProducerTemplate.to("undertow:http://localhost:{{local.server.port}}/api/user/1")
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.GET)
-				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON)
 				.withHeader(RestEndpoints.HEADER_BUSINESSID,"X")
 				.send();
 		
@@ -78,7 +75,6 @@ public class BusinessIdTest extends Assert {
 		// Call get
 		Exchange response = fluentProducerTemplate.to("undertow:http://localhost:{{local.server.port}}/configprops")
 				.withHeader(Exchange.HTTP_METHOD, HttpMethod.GET)
-				.withHeader(Exchange.ACCEPT_CONTENT_TYPE, MediaType.APPLICATION_JSON)
 				.send();
 		
 		assertEquals(200, response.getIn().getHeader(Exchange.HTTP_RESPONSE_CODE));
