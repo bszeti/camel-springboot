@@ -12,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @DirtiesContext(classMode=ClassMode.AFTER_CLASS) //classMode default value. Shutdown spring context after class (all tests are run using the same context)
 public class PostTest extends Assert {
+	private static final Logger log = LoggerFactory.getLogger(PostTest.class);
 
 	//Local server port can be injected also available in the context as {{local.server.port}}.
 	@LocalServerPort
@@ -47,8 +50,11 @@ public class PostTest extends Assert {
 	@Autowired
 	CamelContext context;
 
+
 	@Before
 	public void before() throws Exception {
+		log.info("Local port: {}",port);
+
 		//Before is called for each methods, but we only want to run this once as the context is created once for the whole class
 		if (context.getStatus()==ServiceStatus.Stopped) {
 			

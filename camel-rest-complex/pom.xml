@@ -7,17 +7,22 @@
   <artifactId>camel-rest-complex</artifactId>
   <version>1.0-SNAPSHOT</version>
   
+
+
   <name>Example :: Spring-Boot :: RestDSL</name>
   <description>Spring Boot example using Camel RestDSL to provide rest services </description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <fabric8.version>3.0.8</fabric8.version>
+    <!-- <fabric8.version>3.0.8</fabric8.version> -->
+    <fuse.version>7.3.0.fuse-730058-redhat-00001</fuse.version>
+
     <swagger-ui.version>3.1.4</swagger-ui.version>
+    <webjars.version>0.36</webjars.version>
     <commons-collections4.version>4.1</commons-collections4.version>
 
-    <!-- plugins -->
+    <!-- plugins --> 
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version> <!-- Unit test runner were created before the tests with 2.19 -->
     <maven-dependency-plugin.version>2.10</maven-dependency-plugin.version>
@@ -28,13 +33,24 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
+
+<!-- import Fuse BOM first -->
+            <dependency>
+                <groupId>org.jboss.redhat-fuse</groupId>
+                <artifactId>fuse-springboot-bom</artifactId>
+                <version>${fuse.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+      <!-- <dependency>
         <groupId>io.fabric8</groupId>
         <artifactId>fabric8-project-bom-camel-spring-boot</artifactId>
+        <version></version>
         <version>${fabric8.version}</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
+      </dependency> -->
     </dependencies>
   </dependencyManagement>
 
@@ -115,6 +131,7 @@
     <dependency>
         <groupId>org.webjars</groupId>
         <artifactId>webjars-locator</artifactId>
+        <version>${webjars.version}</version>
     </dependency>
 
     <dependency>

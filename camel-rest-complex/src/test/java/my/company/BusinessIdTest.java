@@ -7,7 +7,6 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.FluentProducerTemplate;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
-import org.apache.camel.test.spring.MockEndpointsAndSkip;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
