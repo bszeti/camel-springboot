@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Dependency versions -->
-        <fuse.version>7.2.0.fuse-720020-redhat-00001</fuse.version>
+        <fuse.version>7.5.0.fuse-750029-redhat-00002</fuse.version>
 
         <!--Documentation
             https://access.redhat.com/documentation/en-us/red_hat_fuse/7.2/html-single/fuse_on_openshift_guide/
@@ -21,7 +21,7 @@
         <!-- Maven plugin versions -->
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
-        <fabric8-maven-plugin.version>7.1.0.fuse-710019-redhat-00002</fabric8-maven-plugin.version> <!-- v7.2.0.fuse-720020-redhat-00001 has a problem with fabric8:deploy -->
+        <fabric8-maven-plugin.version>7.5.0.fuse-750029-redhat-00002</fabric8-maven-plugin.version> <!-- v7.2.0.fuse-720020-redhat-00001 has a problem with fabric8:deploy -->
 
     </properties>
 
