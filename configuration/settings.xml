@@ -10,7 +10,7 @@
             <repositories>
                 <repository>
                     <id>central</id>
-                    <url>http://repo1.maven.org/maven2</url>
+                    <url>https://repo1.maven.org/maven2</url>
                     <releases>
                         <enabled>true</enabled>
                     </releases>
@@ -21,19 +21,19 @@
                 <repository>
                     <id>redhatga</id>
                     <name>Enterprise Releases</name>
-                    <url>http://maven.repository.redhat.com/ga</url>
+                    <url>https://maven.repository.redhat.com/ga</url>
                 </repository>
                 <repository>
                     <id>redhatearly</id>
                     <name>Enterprise Releases</name>
-                    <url>http://maven.repository.redhat.com/earlyaccess/all</url>
+                    <url>https://maven.repository.redhat.com/earlyaccess/all</url>
                 </repository>
             </repositories>
 
             <pluginRepositories>
                 <pluginRepository>
                     <id>central</id>
-                    <url>http://repo1.maven.org/maven2</url>
+                    <url>https://repo1.maven.org/maven2</url>
                     <releases>
                         <enabled>true</enabled>
                     </releases>
@@ -44,12 +44,12 @@
                 <pluginRepository>
                     <id>redhatga</id>
                     <name>Enterprise Releases</name>
-                    <url>http://maven.repository.redhat.com/ga</url>
+                    <url>https://maven.repository.redhat.com/ga</url>
                 </pluginRepository>
                 <pluginRepository>
                     <id>redhatearly</id>
                     <name>Enterprise Releases</name>
-                    <url>http://maven.repository.redhat.com/earlyaccess/all</url>
+                    <url>https://maven.repository.redhat.com/earlyaccess/all</url>
                 </pluginRepository>
             </pluginRepositories>
         </profile>
