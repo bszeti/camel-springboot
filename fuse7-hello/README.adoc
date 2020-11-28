@@ -59,7 +59,7 @@ There are for different examples how to build the container image on OpenShift (
   oc start-build -F --from-dir=./target fuse7-hello-dockerfile
   oc apply -f deploy/deployment-dockerfile.yaml
 
-* Dockerfile: Copy the binary only into the base image. This example uses a Dockerfile embedded in BuildConfig.
+* Dockerfile binary: Copy the binary only into the base image. This example uses a Dockerfile embedded in BuildConfig.
 
   oc apply -f deploy/buildconfig-dockerfile-binary.yaml
   oc start-build -F --from-dir=./target fuse7-hello-dockerfile-binary
