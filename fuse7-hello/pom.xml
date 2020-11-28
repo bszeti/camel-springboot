@@ -11,17 +11,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Dependency versions -->
-        <fuse.version>7.5.0.fuse-750029-redhat-00002</fuse.version>
+<!--        <fuse.version>7.5.0.fuse-750029-redhat-00002</fuse.version>-->
+        <fuse.version>7.7.0.fuse-sb2-770010-redhat-00001</fuse.version>
 
         <!--Documentation
-            https://access.redhat.com/documentation/en-us/red_hat_fuse/7.2/html-single/fuse_on_openshift_guide/
-            https://docs.spring.io/spring-boot/docs/1.5.16.RELEASE/reference/htmlsingle/
+            https://access.redhat.com/documentation/en-us/red_hat_fuse/7.7/html-single/fuse_on_openshift_guide/
+            https://docs.spring.io/spring-boot/docs/2.1.6.RELEASE/reference/htmlsingle/
         -->
 
         <!-- Maven plugin versions -->
-        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
-        <fabric8-maven-plugin.version>7.5.0.fuse-750029-redhat-00002</fabric8-maven-plugin.version> <!-- v7.2.0.fuse-720020-redhat-00001 has a problem with fabric8:deploy -->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+<!--        <fabric8-maven-plugin.version>7.5.0.fuse-750029-redhat-00002</fabric8-maven-plugin.version> -->
+        <!-- v7.2.0.fuse-720020-redhat-00001 has a problem with fabric8:deploy -->
 
     </properties>
 
@@ -46,6 +48,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -65,10 +77,10 @@
         </dependency>
 
         <!-- OpenShift config -->
-        <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>spring-cloud-kubernetes-core</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.cloud</groupId>-->
+<!--            <artifactId>spring-cloud-starter-kubernetes-config</artifactId>-->
+<!--        </dependency>-->
 
         <!-- testing -->
         <dependency>
@@ -105,7 +117,7 @@
                 <plugin>
                     <groupId>org.jboss.redhat-fuse</groupId>
                     <artifactId>fabric8-maven-plugin</artifactId>
-                    <version>${fabric8-maven-plugin.version}</version>
+                    <version>${fuse.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -205,5 +217,5 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
-    
+
 </project>
