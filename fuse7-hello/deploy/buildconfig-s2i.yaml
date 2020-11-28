@@ -5,7 +5,9 @@ metadata:
   name: fuse7-hello-s2i
   labels:
     app: fuse7-hello
-spec: {}
+spec:
+  lookupPolicy:
+    local: true
 ---
 apiVersion: v1
 kind: BuildConfig

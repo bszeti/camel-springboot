@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
         - name: main
-          image: image-registry.openshift-image-registry.svc:5000/bszeti/fuse7-hello-s2i:latest
+          #image: image-registry.openshift-image-registry.svc:5000/bszeti/fuse7-hello-s2i:latest
+          image: fuse7-hello-s2i:latest
           ports:
             - containerPort: 8080
               name: http
