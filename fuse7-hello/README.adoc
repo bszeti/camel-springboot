@@ -1,4 +1,4 @@
-## Simple HelloWorld REST api using Fuse7.2 BOM
+## Simple HelloWorld REST api using Fuse7.5 BOM
 The projects build executable Spring Boot fat jar and also can be run in OpenShift.
 
 ### Build and run locally 
