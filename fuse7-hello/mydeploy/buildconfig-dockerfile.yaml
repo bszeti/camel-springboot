@@ -29,7 +29,9 @@ spec:
       FROM overwritten-by-strategy-from-name
       COPY * /tmp/app-src/
       WORKDIR /tmp/app-src
-      RUN pwd && ls -las
+      RUN pwd && ls -las && ls -las main
+      RUN cat Dockerfile
+      RUN sleep 120
 
       # RUN mvn clean package
       COPY target/*.jar /deployments/
