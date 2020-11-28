@@ -17,7 +17,7 @@ Try:
   curl -k http://localhost:8080/api/hello
   curl -k http://localhost:8080/api/hello/MyName
 
-### Build and run using MiniShift (or OpenShift)
+### Build and run for development using OpenShift (or MiniShift)
 *Deploy* to minishift (run only once):
  
   oc project myproject
@@ -36,8 +36,17 @@ or delete the deployed resources:
 
   oc delete all -l=app=fuse7-hello
 
-### Build image on OpenShift or CRC
+### Build image locally
 
+Run the Maven build and use a simple Dockerfile to add jar to Fuse base image:
+
+  mvn clean package
+  docker login registry.redhat.io
+  docker build --file deploy/Dockerfile-local --tag fuse7-hello:latest .
+  docker run -it -p 18080:8080 -p 19779:9779 fuse7-hello:latest
+  curl http://localhost:18080/actuator/health
+
+### Build image on OpenShift (or CRC)
 There are for different examples how to build the container image on OpenShift (see /deploy dir):
 
 * Source-to-image: Use the automated s2i feature of the Fuse 7 image. To build directly from git repo:
@@ -65,6 +74,11 @@ There are for different examples how to build the container image on OpenShift (
   oc start-build -F --from-dir=./target fuse7-hello-dockerfile-binary
   oc apply -f deploy/deployment-dockerfile-binary.yaml
 
+[NOTE]
+====
+The SpringBoot app will try to read config parameters from a ConfigMap called `fuse7-hello`. The secrets could be be mounted.
+To avoid the - harmless - exception add _view_ permissions to _default_ ServiceAccount: `oc policy add-role-to-user -z default view`.
+====
 
 ### Build image on MiniShift
 

@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.mycompany</groupId>
+    <groupId>bszeti.camelspringboot</groupId>
     <artifactId>fuse7-hello</artifactId>
     <version>1.0-SNAPSHOT</version>
 
