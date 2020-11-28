@@ -26,16 +26,16 @@ spec:
       uri: https://github.com/bszeti/camel-springboot.git
     contextDir: fuse7-hello
     dockerfile: |-
-      FROM overwritten-by-strategy-from-name
-      COPY * /tmp/app-src/
-      WORKDIR /tmp/app-src
-      RUN pwd && ls -las && ls -las main
-      RUN cat Dockerfile
-      RUN sleep 120
-
-      # RUN mvn clean package
-      COPY target/*.jar /deployments/
-      RUN rm -rf *
+      FROM overwritten-from-strategy-field
+      # mkdir to advance to avoid permission issues
+      RUN mkdir /tmp/src
+      WORKDIR /tmp/src
+      COPY --chown=jboss . .
+      # Just to check everything we have
+      RUN pwd && ls -las && cat Dockerfile
+      RUN mvn clean package -Dmaven.repo.local=/tmp/localrepo && \
+          mv target/*.jar /deployments/ && \
+          rm -rf /tmp/src
   strategy:
     dockerStrategy:
 #      dockerfilePath: deploy/Dockerfile-custom
