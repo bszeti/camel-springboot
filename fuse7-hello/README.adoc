@@ -1,11 +1,8 @@
-## Simple HelloWorld REST api using Fuse7.5 BOM
+## Simple HelloWorld REST api with Fuse 7.7
 The projects build executable Spring Boot fat jar and also can be run in OpenShift.
 
 ### Build and run locally 
-The Red Hat maven repos are configured in ../configuration/settings.xml Maven settings file. If you don't want to add the same repositories to your maven ~/.m2/settings.xml make sure to execute all the "mvn" commands below by adding:
-
- mvn -s configuration/settings.xml [COMMANDS]
-
+The Red Hat maven repos are configured in pom.xml.
 Run locally:
 
   mvn clean install
@@ -13,14 +10,14 @@ Run locally:
 
 Or with spring-boot-maven-plugin:
 
-  mvn spring-boot:run
+  mvn clean spring-boot:run
 
 Try:
 
   curl -k http://localhost:8080/api/hello
   curl -k http://localhost:8080/api/hello/MyName
 
-### Build and run using MiniShift (or OpenShift) 
+### Build and run using MiniShift (or OpenShift)
 *Deploy* to minishift (run only once):
  
   oc project myproject
@@ -39,7 +36,11 @@ or delete the deployed resources:
 
   oc delete all -l=app=fuse7-hello
 
-### Prepare Minishift
+### Build image locally
+
+### Build image on OpenShift
+
+curl http://localhost:9779/metrics
 
 Download (min v3.7.0): https://developers.redhat.com/products/cdk/overview/
 
@@ -103,7 +104,6 @@ If the "Open Jolokia Console" drops an authentication error, you can disable Jol
 
 ### Documentation
 
- - Fuse on Openshift: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.2/html-single/fuse_on_openshift_guide/
- - All Fuse docs: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.2/
- - SpringBoot: https://docs.spring.io/spring-boot/docs/1.5.16.RELEASE/reference/htmlsingle/
- - Camel Rest DSL: https://github.com/apache/camel/blob/master/camel-core/src/main/docs/rest-dsl.adoc
+ - Fuse on Openshift: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.7/html-single/fuse_on_openshift_guide/
+ - All Fuse docs: https://access.redhat.com/documentation/en-us/red_hat_fuse/7.7/
+ - SpringBoot: https://docs.spring.io/spring-boot/docs/2.1.6.RELEASE/reference/htmlsingle/

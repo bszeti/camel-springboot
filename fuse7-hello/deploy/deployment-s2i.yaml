@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fuse7-hello-s2i
+  labels:
+    app: fuse7-hello
+spec:
+  selector:
+    matchLabels:
+      app: fuse7-hello-s2i
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fuse7-hello-s2i
+    spec:
+      containers:
+        - name: main
+          image: image-registry.openshift-image-registry.svc:5000/bszeti/fuse7-hello-s2i:latest
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9779
+              name: metrics

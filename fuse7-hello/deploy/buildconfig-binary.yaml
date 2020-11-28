@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: fuse7-hello
+  labels:
+    app: fuse7-hello
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: "fuse7-hello:latest"
+  source:
+    type: Binary
+    binary: {}
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        namespace: "${BASE_IMAGE_NAMESPACE}"
+        name: "${BASE_IMAGE_AND_TAG}"

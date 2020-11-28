@@ -1,0 +1,33 @@
+# Build from Maven source using the Fuse builder image
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: fuse7-hello-s2i
+  labels:
+    app: fuse7-hello
+spec: {}
+---
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: fuse7-hello-s2i
+  labels:
+    app: fuse7-hello
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: "fuse7-hello-s2i:latest"
+  source:
+    git:
+      uri: https://github.com/bszeti/camel-springboot.git
+    contextDir: fuse7-hello
+  strategy:
+    type: Source
+    sourceStrategy:
+      from:
+#        kind: ImageStreamTag
+#        namespace: openshift
+#        name: fuse7-java-openshift:1.7
+        kind: DockerImage
+        name: registry.redhat.io/fuse7/fuse-java-openshift:1.7
