@@ -1,21 +1,35 @@
+# Build using a Dockerfile (embedded) simply adding the jar to the image
+# oc start-build -F fuse7-hello-dockerfile-binary --from-dir=./target
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: fuse7-hello-dockerfile-binary
+  labels:
+    app: fuse7-hello
+spec:
+  lookupPolicy:
+    local: true
+---
 apiVersion: v1
 kind: BuildConfig
 metadata:
-  name: fuse7-hello
+  name: fuse7-hello-dockerfile-binary
   labels:
     app: fuse7-hello
 spec:
   output:
     to:
       kind: ImageStreamTag
-      name: "fuse7-hello-dockerfile:latest"
+      name: "fuse7-hello-dockerfile-binary:latest"
   source:
     type: Binary
     binary: {}
+    dockerfile: |-
+      FROM overwritten-from-strategy-field
+      COPY *.jar /deployments/
   strategy:
-    type: Source
-    sourceStrategy:
+    dockerStrategy:
+      dockerfilePath: deploy/Dockerfile-binary
       from:
-        kind: ImageStreamTag
-        namespace: "${BASE_IMAGE_NAMESPACE}"
-        name: "${BASE_IMAGE_AND_TAG}"
+        kind: DockerImage
+        name: registry.redhat.io/fuse7/fuse-java-openshift:1.7
