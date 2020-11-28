@@ -1,14 +1,27 @@
+# Use binary artifact (jar) automatically picked up by the Fuse builder image automatically
+# oc start-build -F --from-dir=./target fuse7-hello-binary
+# This is not strictly a binary build. If the directory contains the whole source, it runs a maven build.
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: fuse7-hello-binary
+  labels:
+    app: fuse7-hello
+spec:
+  lookupPolicy:
+    local: true
+---
 apiVersion: v1
 kind: BuildConfig
 metadata:
-  name: fuse7-hello
+  name: fuse7-hello-binary
   labels:
     app: fuse7-hello
 spec:
   output:
     to:
       kind: ImageStreamTag
-      name: "fuse7-hello:latest"
+      name: "fuse7-hello-binary:latest"
   source:
     type: Binary
     binary: {}
@@ -16,6 +29,5 @@ spec:
     type: Source
     sourceStrategy:
       from:
-        kind: ImageStreamTag
-        namespace: "${BASE_IMAGE_NAMESPACE}"
-        name: "${BASE_IMAGE_AND_TAG}"
+        kind: DockerImage
+        name: registry.redhat.io/fuse7/fuse-java-openshift:1.7
