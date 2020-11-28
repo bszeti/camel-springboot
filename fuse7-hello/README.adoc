@@ -36,11 +36,37 @@ or delete the deployed resources:
 
   oc delete all -l=app=fuse7-hello
 
-### Build image locally
+### Build image on OpenShift or CRC
 
-### Build image on OpenShift
+There are for different examples how to build the container image on OpenShift (see /deploy dir):
 
-curl http://localhost:9779/metrics
+* Source-to-image: Use the automated s2i feature of the Fuse 7 image. To build directly from git repo:
+
+  oc apply -f deploy/buildconfig-s2i.yaml
+  oc start-build -F fuse7-hello-s2i
+  oc apply -f deploy/deployment-s2i.yaml
+
+* Binary: Build on your localhost then upload the jar for the build.
+
+   oc apply -f deploy/buildconfig-binary.yaml
+   mvn clean package
+   oc start-build -F --from-dir=./target fuse7-hello-binary
+   oc apply -f deploy/deployment-binary.yaml
+
+* Dockerfile: Run Maven build during the container build. This example uses a Dockerfile from the git repo (instead of embedded in BuildConfig).
+
+  oc apply -f deploy/buildconfig-dockerfile.yaml
+  oc start-build -F --from-dir=./target fuse7-hello-dockerfile
+  oc apply -f deploy/deployment-dockerfile.yaml
+
+* Dockerfile: Copy the binary only into the base image. This example uses a Dockerfile embedded in BuildConfig.
+
+  oc apply -f deploy/buildconfig-dockerfile-binary.yaml
+  oc start-build -F --from-dir=./target fuse7-hello-dockerfile-binary
+  oc apply -f deploy/deployment-dockerfile-binary.yaml
+
+
+### Build image on MiniShift
 
 Download (min v3.7.0): https://developers.redhat.com/products/cdk/overview/
 

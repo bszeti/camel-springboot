@@ -1,4 +1,5 @@
 # Build from Maven source using the Fuse builder image
+# oc start-build -F fuse7-hello-s2i
 apiVersion: v1
 kind: ImageStream
 metadata:
