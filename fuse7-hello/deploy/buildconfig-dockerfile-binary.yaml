@@ -1,4 +1,4 @@
-# Build using a Dockerfile (embedded) simply adding the jar to the image
+# Build using a Dockerfile (embedded) simply adding the jar to the Fuse image where it expects it
 # oc start-build -F fuse7-hello-dockerfile-binary --from-dir=./target
 apiVersion: v1
 kind: ImageStream
@@ -29,7 +29,6 @@ spec:
       COPY *.jar /deployments/
   strategy:
     dockerStrategy:
-      dockerfilePath: deploy/Dockerfile-binary
       from:
         kind: DockerImage
         name: registry.redhat.io/fuse7/fuse-java-openshift:1.7

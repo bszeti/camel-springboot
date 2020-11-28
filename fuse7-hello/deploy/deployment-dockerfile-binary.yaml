@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fuse7-hello-dockerfile-binary
+  labels:
+    app: fuse7-hello
+spec:
+  selector:
+    matchLabels:
+      app: fuse7-hello-dockerfile-binary
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fuse7-hello-dockerfile-binary
+    spec:
+      containers:
+        - name: main
+          #image: image-registry.openshift-image-registry.svc:5000/bszeti/fuse7-hello-dockerfile-binary:latest
+          image: fuse7-hello-dockerfile-binary:latest
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9779
+              name: metrics
