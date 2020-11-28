@@ -1,0 +1,4 @@
+# Run from fuse7-hello/
+# docker build --file deploy/Dockerfile-local --tag fuse7-hello:latest .
+FROM registry.redhat.io/fuse7/fuse-java-openshift:1.7
+COPY target/*.jar /deployments/
