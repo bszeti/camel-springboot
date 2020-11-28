@@ -1,7 +1,19 @@
+# Build using a Dockerfile (embedded) running Maven and adding the jar to the image
+# oc start-build -F fuse7-hello-dockerfile
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: fuse7-hello-dockerfile
+  labels:
+    app: fuse7-hello
+spec:
+  lookupPolicy:
+    local: true
+---
 apiVersion: v1
 kind: BuildConfig
 metadata:
-  name: fuse7-hello
+  name: fuse7-hello-dockerfile
   labels:
     app: fuse7-hello
 spec:
@@ -10,12 +22,21 @@ spec:
       kind: ImageStreamTag
       name: "fuse7-hello-dockerfile:latest"
   source:
-    type: Binary
-    binary: {}
+    git:
+      uri: https://github.com/bszeti/camel-springboot.git
+    contextDir: fuse7-hello
+    dockerfile: |-
+      FROM overwritten-by-strategy-from-name
+      COPY * /tmp/app-src/
+      WORKDIR /tmp/app-src
+      RUN pwd && ls -las
+
+      # RUN mvn clean package
+      COPY target/*.jar /deployments/
+      RUN rm -rf *
   strategy:
-    type: Source
-    sourceStrategy:
+    dockerStrategy:
+#      dockerfilePath: deploy/Dockerfile-custom
       from:
-        kind: ImageStreamTag
-        namespace: "${BASE_IMAGE_NAMESPACE}"
-        name: "${BASE_IMAGE_AND_TAG}"
+        kind: DockerImage
+        name: registry.redhat.io/fuse7/fuse-java-openshift:1.7
