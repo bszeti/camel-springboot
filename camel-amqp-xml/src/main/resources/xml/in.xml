@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<order uuid="0d57c60b-f6ac-4b74-b355-a64f0911ca76">
+    <item id="1">
+        <name>MyTool</name>
+        <description>My tool</description>
+    </item>
+    <item id="2">
+        <name>MyFruit</name>
+        <description>My Fruit</description>
+    </item>
+</order>
