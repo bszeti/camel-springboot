@@ -54,6 +54,7 @@
             <artifactId>camel-spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- JMS -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jms</artifactId>
@@ -70,6 +71,20 @@
             <version>1.7.0.redhat-00002</version>
 		</dependency>
 
+        <!-- Database -->
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-sql-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.27</version>
+        </dependency>
 
     </dependencies>
 
