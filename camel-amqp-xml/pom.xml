@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mycompany</groupId>
-    <artifactId>fuse-camel-amq</artifactId>
+    <artifactId>camel-amqp-xml</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -53,6 +53,10 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring-boot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-jaxb</artifactId>
+        </dependency>
 
         <!-- JMS -->
         <dependency>
@@ -83,7 +87,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.27</version>
+            <version>42.5.0.redhat-00001</version>
         </dependency>
 
     </dependencies>
@@ -119,6 +123,26 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Plugin required to build java classes from XSD using XJC -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.5.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>
+                        <source>src/main/resources/xml/in.xsd</source>
+                    </sources>
+                    <packageName>com.mycompany.jaxb</packageName>
+                </configuration>
             </plugin>
 
         </plugins>
